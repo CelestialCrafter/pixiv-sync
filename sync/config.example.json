@@ -1,0 +1,8 @@
+{
+	"useCache": false,
+	"translateTags": true,
+	"privateImages": true,
+	"userId": 0,
+	"requestCooldown": 500,
+	"pictureDirectory": "/home/user/Pictures/art"
+}

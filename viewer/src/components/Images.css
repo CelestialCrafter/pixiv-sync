@@ -1,0 +1,9 @@
+.images {
+	width: 1920px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.image {
+	object-fit: contain;
+}

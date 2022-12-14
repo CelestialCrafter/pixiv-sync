@@ -32,8 +32,8 @@ Use .example.env as a base and fill out `PIXIV_TOKEN`
 Go to [Pixiv](https://pixiv.net) and click your profile button\
 ![Profile Button](https://cdn.discordapp.com/attachments/812499252642054184/1052593278761050152/image.png)\
 Next, click the Bookmarks button\
-![Bookmarks Button](https://cdn.discordapp.com/attachments/812499252642054184/1052593933772935238/image.png)
-And finally get your User ID from the URL
+![Bookmarks Button](https://cdn.discordapp.com/attachments/812499252642054184/1052593933772935238/image.png)\
+And finally get your User ID from the URL\
 ![URL](https://cdn.discordapp.com/attachments/812499252642054184/1052594290087444581/image.png)
 
 ### How to format your `pictureDirectory`
@@ -48,11 +48,11 @@ inside both of those folders\
 - ~/Pictures/art/private/deleted
 
 ### How to get your `PIXIV_TOKEN`
-Go to [Pixiv](https://pixiv.net) and open Inspect Element (`CTRL + Shift + I` on most browsers) and go to the `Network` Tab
+Go to [Pixiv](https://pixiv.net) and open Inspect Element (`CTRL + Shift + I` on most browsers) and go to the `Network` Tab\
 ![Network Tab](https://cdn.discordapp.com/attachments/812499252642054184/1052605331454308432/image.png)\
-Next on the first request to `pixiv.net` (Reload if you have to)
+Next on the first request to `pixiv.net` (Reload if you have to)\
 ![Request](https://cdn.discordapp.com/attachments/812499252642054184/1052605978496991242/image.png)\
-And then go to the `Cookies` tab and find PHPSESSID
+And then go to the `Cookies` tab and find PHPSESSID\
 ![Cookies Tab](https://cdn.discordapp.com/attachments/812499252642054184/1052607832073183313/image.png)\
 Finally, click the PHPSESSID value and copy everything after the _!
 

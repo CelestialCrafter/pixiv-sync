@@ -17,6 +17,9 @@ Sync your pictures with your Pixiv account, along with an improved image viewer.
 - Ability to quickly re-sync images and data while changing config parameters
 - Efficiently and quickly show all images without any need for pagination
 
+## Building
+- `cd` into `src/viewer` and run `npm run build`
+
 ## Setup
 NPM will be used as the package manager, adapt the commands for your package manager if you use something else.
 - Run `npm i`
@@ -55,6 +58,3 @@ Next on the first request to `pixiv.net` (Reload if you have to)\
 And then go to the `Cookies` tab and find PHPSESSID\
 ![Cookies Tab](https://cdn.discordapp.com/attachments/812499252642054184/1052607832073183313/image.png)\
 Finally, click the PHPSESSID value and copy everything after the _!
-
-## Building
-- `cd` into `src/viewer` and run `yarn build`

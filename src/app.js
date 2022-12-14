@@ -1,14 +1,9 @@
 // @TODO write server code that uses built react site as static and adds api endpoints to:
 // 	1. re-sync files
-// 	2. change config options
-// 	3. list images and tags
+// 	2. change config options when re-syncing
 // 	4. override config.json when passing options into sync()
 
 // @TODO create seperate files for privatePosts.json and posts.json in sync
-// @TODO fix react site start scripts
-// @TODO override requests to image directories like (/images/xxxxxx-x.jpg) to redirect to config.pictureDirectory instead of a symlink
-// @TODO make request to image list endpoint on /data/ instead of requiring the lists in /data/
-// @TODO maybe use redux instead of passing around react state, not needed though
 
 const proxy = require('express-http-proxy');
 const express = require('express');

@@ -6,10 +6,10 @@ const sizeOf = promisify(require('image-size'));
 const {
 	privateImages,
 	pictureDirectory
-} = require('../config.json');
+} = require('../../../config.json');
 
-const imagesPath = join(pictureDirectory, privateImages ? 'nsfw' : 'images', 'pixiv');
-const postCachePath = join(__dirname, '../data/posts.json');
+const imagesPath = join(pictureDirectory, privateImages ? 'private' : 'images', 'pixiv');
+const postCachePath = join(__dirname, '../../../data/posts.json');
 
 const setImageSizes = async originalPosts => {
 	const posts = originalPosts;

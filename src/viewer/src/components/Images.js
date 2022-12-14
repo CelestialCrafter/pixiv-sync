@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import Image from './Image';
+
+import tags from '../data/tags.json';
 
 import './Images.css';
-import tags from '../data/tags.json';
-import posts from '../data/posts.json';
-import nsfwPosts from '../data/nsfwPosts.json';
-const Image = React.lazy(() => import('./Image'));
 
-const Images = ({ currentTags, nsfw }) => {
-	const [usedPosts, setUsedPosts] = useState(nsfw ? nsfwPosts : posts);
+const Images = ({ currentTags, privateImages, privatePosts, posts }) => {
+	const [usedPosts, setUsedPosts] = useState(privateImages ? privatePosts : posts);
 	const forceLoadAmount = 25;
 	const [loadedImages, setLoadedImages] = useState(Array(forceLoadAmount).fill(false));
 
@@ -16,7 +15,7 @@ const Images = ({ currentTags, nsfw }) => {
 		tagsEn: post.tags.map(tag => tags[tag]).filter(t => t)
 	}));
 
-	useEffect(() => setUsedPosts(nsfw ? nsfwPosts : posts), [nsfw]);
+	useEffect(() => setUsedPosts(privateImages ? privatePosts : posts), [posts, privateImages, privatePosts]);
 
 	return <div>
 		<button onClick={() => {
@@ -35,7 +34,7 @@ const Images = ({ currentTags, nsfw }) => {
 								prevLoadedImages[i] = state;
 								return prevLoadedImages;
 							})}
-							nsfw={nsfw}
+							privateImages={privateImages}
 							posts={usedPosts}
 							i={i}
 							page={postI}

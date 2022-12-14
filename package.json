@@ -1,0 +1,26 @@
+{
+	"name": "pixiv-sync",
+	"version": "1.0.0",
+	"description": "Sync your pictures with your Pixiv account, along with an improved image viewer",
+	"main": "src/app.js",
+	"repository": "https://github.com/CelestialCrafter/pixiv-sync.git",
+	"author": "CelestialCrafter <celestialcraftermc@gmail.com>",
+	"license": "MIT",
+	"scripts": {
+		"sync": "node src/sync/syncCli.js",
+		"start": "node ."
+	},
+	"dependencies": {
+		"axios": "^1.2.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"express-http-proxy": "^1.6.3",
+		"image-size": "^1.0.2"
+	},
+	"devDependencies": {
+		"eslint": "^8.29.0",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-plugin-import": "^2.26.0"
+	}
+}

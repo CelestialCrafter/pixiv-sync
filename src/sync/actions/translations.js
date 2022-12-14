@@ -7,13 +7,13 @@ const {
 const { join } = require('path');
 const axios = require('axios');
 
-const tagCachePath = join(__dirname, '../data/tags.json');
+const tagCachePath = join(__dirname, '../../../data/tags.json');
 const startFrom = null;
 
 const {
 	translateTags,
 	requestCooldown
-} = require('../config.json');
+} = require('../../../config.json');
 
 const downloadTranslations = async (postsOriginal, { headers }) => {
 	let posts = postsOriginal;

@@ -3,6 +3,7 @@ data
 images
 nsfw
 config.json
+build/
 
 # Logs
 logs

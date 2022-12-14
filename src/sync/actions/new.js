@@ -3,11 +3,13 @@ const { join } = require('path');
 const axios = require('axios');
 
 const {
+	batchSize,
 	privateImages,
+	requestCooldown,
 	pictureDirectory
-} = require('../config.json');
+} = require('../../../config.json');
 
-const imagesPath = join(pictureDirectory, privateImages ? 'nsfw' : 'images', 'pixiv');
+const imagesPath = join(pictureDirectory, privateImages ? 'private' : 'images', 'pixiv');
 const images = readdirSync(imagesPath).filter(image => image.endsWith('.jpg')).map(image => image.replace('.jpg', ''));
 
 const getNew = posts => posts.filter(post => !images.map(image => image.split('-')[0]).includes(post.id));
@@ -50,7 +52,6 @@ const downloadNew = async (posts, headers) => {
 		);
 
 		// Split up the requests into batches of batchSize
-		const batchSize = 15;
 		const splitPostRequests = [];
 
 		for (let i = 0; i < postRequests.length; i += batchSize) {
@@ -62,6 +63,8 @@ const downloadNew = async (posts, headers) => {
 			const promises = await Promise.all(requestFunctions.map(f => f()));
 			console.log(`Finished batch ${batch}`);
 			batch++;
+			// eslint-disable-next-line no-promise-executor-return
+			await new Promise(res => setTimeout(res, requestCooldown));
 			return promises;
 		}));
 	} else console.log('No new posts to download');

@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 const dotenv = require('dotenv');
 const axios = require('axios');
 const {
@@ -9,10 +8,11 @@ const {
 } = require('fs');
 const { join } = require('path');
 
-const downloadTranslations = require('./translations');
-const setImageSizes = require('./imageSizes');
-const removeUnliked = require('./unliked');
-const downloadNew = require('./new');
+const downloadTranslations = require('./actions/translations');
+const setImageSizes = require('./actions/imageSizes');
+const removeUnliked = require('./actions/unliked');
+const downloadNew = require('./actions/new');
+const checkIntegrity = require('./actions/integrity');
 
 dotenv.config();
 
@@ -21,9 +21,9 @@ const {
 	privateImages,
 	userId,
 	requestCooldown
-} = require('../config.json');
+} = require('../../config.json');
 
-const postCachePath = join(__dirname, '../data/posts.json');
+const postCachePath = join(__dirname, '../../data/posts.json');
 
 const generateURL = (offset = 0) =>
 	`https://www.pixiv.net/ajax/user/${userId}/illusts/bookmarks?tag=&offset=${offset}&limit=100&rest=${privateImages ? 'hide' : 'show'}&lang=en`;
@@ -72,10 +72,21 @@ const getPosts = async () => {
 		console.log(`${Math.min(posts.length, likes)}/${Math.max(likes, posts.length)}`);
 	}
 
-	return posts.filter((post, i) => posts.indexOf(post) === i).filter(post => post.updateDate !== '1970-01-01T00:00:00+09:00');
+	return posts.filter((post, i) => posts.map(p => p.id).indexOf(post.id) === i).filter(post => post.updateDate !== '1970-01-01T00:00:00+09:00');
 };
 
-(async () => {
+const tryDownloads = async (posts, retrys = 0) => {
+	await downloadNew(posts, headers);
+	await setImageSizes(posts);
+
+	const corrupted = await checkIntegrity();
+	if (!corrupted) return;
+
+	if (retrys < 2) tryDownloads(posts, headers);
+	else console.log(`Could not fix corruption after ${retrys + 1} download attempts.`);
+};
+
+const sync = async () => {
 	let posts = null;
 
 	// Check or create cache
@@ -85,8 +96,9 @@ const getPosts = async () => {
 		writeFileSync(postCachePath, JSON.stringify(posts));
 	}
 
-	removeUnliked(posts);
-	downloadNew(posts, headers);
-	setImageSizes(posts);
+	await removeUnliked(posts);
+	await tryDownloads(posts);
 	downloadTranslations(posts, { headers });
-})();
+};
+
+module.exports = sync;

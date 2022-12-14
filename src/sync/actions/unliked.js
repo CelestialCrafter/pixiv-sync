@@ -8,11 +8,11 @@ const { join } = require('path');
 const {
 	privateImages,
 	pictureDirectory
-} = require('../config.json');
+} = require('../../../config.json');
 
-const imagesPath = join(pictureDirectory, privateImages ? 'nsfw' : 'images', 'pixiv');
+const imagesPath = join(pictureDirectory, privateImages ? 'private' : 'images', 'pixiv');
 const images = readdirSync(imagesPath).filter(image => image.endsWith('.jpg')).map(image => image.replace('.jpg', ''));
-const deletedPath = join(pictureDirectory, privateImages ? 'nsfw' : 'images', 'pixiv/deleted');
+const deletedPath = join(pictureDirectory, privateImages ? 'private' : 'images', 'pixiv/deleted');
 const getUnliked = posts => images.filter(image => !posts.map(post => post.id).find(post => post === image.split('-')[0]));
 
 const removeUnliked = async posts => {

@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import tags from '../data/tags.json';
-import posts from '../data/posts.json';
-import nsfwPosts from '../data/nsfwPosts.json';
 
-const Tags = ({ setCurrentTags, currentTags, setNsfw, nsfw, randomize }) => {
+const Tags = ({ setCurrentTags, currentTags, setPrivateImages, privateImages, tags, posts, privatePosts }) => {
 	const [filter, setFilter] = useState('');
 	const [dropdown, setDropdown] = useState(false);
 
-	const usedPosts = nsfw ? nsfwPosts : posts;
+	const usedPosts = privateImages ? privatePosts : posts;
 	const ctwp = [...new Set(usedPosts.map(post => {
 		const postTags = post.tags.map(tag => tags[tag]).filter(t => t);
 		if (currentTags.every(tag => postTags.includes(tag))) return postTags;
@@ -24,13 +21,9 @@ const Tags = ({ setCurrentTags, currentTags, setNsfw, nsfw, randomize }) => {
 					onClick={() => setCurrentTags([])}
 				>RESET</button>
 				<button
-					style={{ border: '1px solid black', borderRadius: 5, padding: 3, margin: 2, backgroundColor: nsfw ? 'red' : 'inherit' }}
-					onClick={() => setNsfw(!nsfw)}
-				>NSFW</button>
-				<button
-					style={{ border: '1px solid black', borderRadius: 5, padding: 3, margin: 2 }}
-					onClick={() => randomize()}
-				>Randomize</button>
+					style={{ border: '1px solid black', borderRadius: 5, padding: 3, margin: 2, backgroundColor: privateImages ? 'red' : 'inherit' }}
+					onClick={() => setPrivateImages(!privateImages)}
+				>PRIVATE</button>
 
 				{ctwp.map(tag => {
 					const styles = { border: '1px solid black', borderRadius: 5, padding: 3, margin: 2, backgroundColor: currentTags.includes(tag) ? 'lime' : 'inherit' };

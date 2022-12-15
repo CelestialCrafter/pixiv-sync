@@ -1,20 +1,18 @@
-// @TODO write server code that uses built react site as static and adds api endpoints to:
-// 	1. re-sync files
-// 	2. change config options when re-syncing
-// 	4. override config.json when passing options into sync()
-
-// @TODO create seperate files for privatePosts.json and posts.json in sync
-
 const proxy = require('express-http-proxy');
+const { fork } = require('child_process');
+const { createServer } = require('http');
+const ioWrapper = require('socket.io');
 const express = require('express');
 const { join } = require('path');
-const url = require('url');
 const axios = require('axios');
 const cors = require('cors');
+const url = require('url');
 
 const { pictureDirectory } = require('../config.json');
 
 const app = express();
+const server = createServer(app);
+const io = ioWrapper(server);
 
 const devProxy = proxy('localhost:3000', {
 	proxyReqPathResolver: req => url.parse(req.originalUrl).path
@@ -30,6 +28,47 @@ const privatePath = join(pictureDirectory, 'private/pixiv');
 app.use('/images', express.static(imagesPath));
 app.use('/private', express.static(privatePath));
 
+app.get('/config', (req, res) => res.sendFile(join(__dirname, '../config.json')));
+
+io.on('connection', socket => {
+	console.log('Connected to client');
+
+	const settingsValidator = {
+		set settings(newSettings) {
+			// eslint-disable-next-line global-require
+			const validKeys = Object.keys(require('../config.json'));
+			const validSettings = newSettings;
+
+			Object.keys(newSettings).forEach(key => (!validKeys.includes(key) ? delete validSettings[key] : null));
+		},
+		// eslint-disable-next-line global-require
+		validSettings: require('../config.json')
+	};
+
+	socket.on('sync', () => {
+		console.log('Recieved Sync request');
+		socket.emit('settings', settingsValidator.validSettings);
+
+		const child = fork('src/sync/sync.js', {
+			env: {
+				RUN_SYNC_IMMEDIATELY: true,
+				WAIT_FOR_SETTINGS: true
+			},
+			stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+		});
+
+		child.stdout.pipe(process.stdout);
+		child.stderr.pipe(process.stderr);
+
+		child.stdout.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(data => socket.emit('syncData', data)));
+		child.stderr.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(data => socket.emit('syncData', data)));
+
+		child.send(settingsValidator.validSettings);
+	});
+
+	socket.once('disconnect', () => console.log('Disconnected'));
+});
+
 const start = async () => {
 	try {
 		await axios.get('http://localhost:3000');
@@ -40,7 +79,7 @@ const start = async () => {
 		app.use(express.static(join(__dirname, 'viewer/build')));
 	}
 
-	app.listen(80, () => console.log('Listening on port 80'));
+	server.listen(80, () => console.log('Listening on port 80'));
 };
 
 start();

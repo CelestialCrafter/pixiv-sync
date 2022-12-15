@@ -19,7 +19,7 @@ const downloadTranslations = async (postsOriginal, { headers }) => {
 	let posts = postsOriginal;
 	const startIndex = posts.indexOf(posts.find(post => post.id === startFrom));
 	posts = startFrom ? posts.slice(startIndex) : posts;
-	if (!translateTags) return console.log('Tag translation is disabled.');
+	if (!translateTags) return console.log('Tag translation is disabled');
 
 	const tags = existsSync(tagCachePath) ? JSON.parse(readFileSync(tagCachePath)) : {};
 	let i = 0;

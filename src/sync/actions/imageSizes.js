@@ -9,7 +9,7 @@ const {
 } = require('../../../config.json');
 
 const imagesPath = join(pictureDirectory, privateImages ? 'private' : 'images', 'pixiv');
-const postCachePath = join(__dirname, '../../../data/posts.json');
+const postCachePath = join(__dirname, '../../../data/', privateImages ? 'privatePosts.json' : 'posts.json');
 
 const setImageSizes = async originalPosts => {
 	const posts = originalPosts;

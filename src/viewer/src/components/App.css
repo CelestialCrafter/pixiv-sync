@@ -1,0 +1,30 @@
+.syncData {
+	max-height: 30vh;
+	overflow-y: auto;
+	margin: 0;
+	scrollbar-width: none;
+	overflow-anchor: auto;
+	list-style-type: none;
+	padding-left: 4px;
+	margin-bottom: 8px;
+}
+
+.syncData li {
+	margin-top: 4px;
+}
+
+button {
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 3px;
+	margin: 2px;
+	background-color: inherit;
+}
+
+.sidebar {
+	top: 0;
+	left: 0;
+	padding-top: 0;
+	position: fixed;
+	overflow-wrap: anywhere;
+}

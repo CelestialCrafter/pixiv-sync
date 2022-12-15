@@ -16,14 +16,16 @@ const checkIntegrity = require('./actions/integrity');
 
 dotenv.config();
 
-const {
+let {
+	/* eslint-disable prefer-const */
 	useCache,
 	privateImages,
 	userId,
 	requestCooldown
+	/* eslint-enable prefer-const */
 } = require('../../config.json');
 
-const postCachePath = join(__dirname, '../../data/posts.json');
+const postCachePath = join(__dirname, '../../data/', privateImages ? 'privatePosts.json' : 'posts.json');
 
 const generateURL = (offset = 0) =>
 	`https://www.pixiv.net/ajax/user/${userId}/illusts/bookmarks?tag=&offset=${offset}&limit=100&rest=${privateImages ? 'hide' : 'show'}&lang=en`;
@@ -83,10 +85,32 @@ const tryDownloads = async (posts, retrys = 0) => {
 	if (!corrupted) return;
 
 	if (retrys < 2) tryDownloads(posts, headers);
-	else console.log(`Could not fix corruption after ${retrys + 1} download attempts.`);
+	else console.log(`Could not fix corruption after ${retrys + 1} download attempts`);
 };
 
-const sync = async () => {
+const sync = async overrideSettings => {
+	Object.keys(overrideSettings).forEach(key => {
+		// eslint-disable-next-line global-require
+		const config = require('../../config.json');
+		if (!Object.keys(config).includes(key)) return;
+
+		const value = overrideSettings[key];
+
+		let prefix = '';
+		let suffix = '';
+
+		if (typeof config[key] === 'string') {
+			prefix = '"';
+			suffix = '"';
+		}
+
+		// Sets the override key to the override value.
+		// instead of doing somethiSng like config.userId, it overrides the userId variable directly by using eval to set variables directly
+
+		// eslint-disable-next-line no-eval
+		eval(`${key} = ${prefix}${value}${suffix}`);
+	});
+
 	let posts = null;
 
 	// Check or create cache
@@ -98,7 +122,11 @@ const sync = async () => {
 
 	await removeUnliked(posts);
 	await tryDownloads(posts);
-	downloadTranslations(posts, { headers });
+	await downloadTranslations(posts, { headers });
+	console.log('Finished Sync');
 };
+
+if (process.env.RUN_SYNC_IMMEDIATELY) if (!process.env.WAIT_FOR_SETTINGS) sync();
+else process.on('message', settings => sync(settings));
 
 module.exports = sync;

@@ -10,7 +10,7 @@ const imagesPath = join(pictureDirectory, privateImages ? 'private' : 'images', 
 const images = readdirSync(imagesPath, { withFileTypes: true }).filter(dirent => dirent.isFile()).map(dirent => dirent.name);
 
 const checkIntegrity = async () => {
-	console.log('Searching for corruption.');
+	console.log('Searching for corruption');
 	let corruptedCount = 0;
 
 	images.forEach(filename => {
@@ -31,7 +31,7 @@ const checkIntegrity = async () => {
 		}
 	});
 
-	console.log(`Found ${corruptedCount} corrupted images.`);
+	console.log(`Found ${corruptedCount} corrupted images`);
 	return corruptedCount > 0;
 };
 

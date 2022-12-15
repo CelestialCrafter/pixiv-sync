@@ -1,15 +1,39 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+	selectAllPosts,
+	selectAllPrivatePosts,
+	selectPrivateEnabled,
+	setPosts,
+	setPrivateEnabled,
+	togglePrivateEnabled
+} from '../slices/posts';
+import { setCurrentPosts, selectAllCurrentPosts } from '../slices/cross';
+import { selectAllCurrentTags, selectAllTags, setCurrentTags, toggleTag } from '../slices/tags';
 
-const Tags = ({ setCurrentTags, currentTags, setPrivateImages, privateImages, tags, posts, privatePosts, setPosts, setPrivatePosts }) => {
+const Tags = () => {
+	const privatePosts = useSelector(selectAllPrivatePosts);
+	const posts = useSelector(selectAllPosts);
+	const tags = useSelector(selectAllTags);
+	const currentTags = useSelector(selectAllCurrentTags);
+	const currentPosts = useSelector(selectAllCurrentPosts);
+	const privateEnabled = useSelector(selectPrivateEnabled);
+
+	const dispatch = useDispatch();
+
 	const [filter, setFilter] = useState('');
 	const [dropdown, setDropdown] = useState(false);
 
-	const usedPosts = privateImages ? privatePosts : posts;
-	const ctwp = [...new Set(usedPosts.map(post => {
-		const postTags = post.tags.map(tag => tags[tag]).filter(t => t);
-		if (currentTags.every(tag => postTags.includes(tag))) return postTags;
-		return false;
-	}).filter(t => t).flat())];
+	const postsWithTags = currentPosts.map(post => {
+		return {
+			id: post.id,
+			tagsEn: post.tags.map(tag => tags[tag]).filter(t => t) || []
+		};
+	});
+
+	const ctwp = [
+		...new Set(Object.values(tags).filter(tag => postsWithTags.find(({ tagsEn }) => tagsEn.includes(tag))))
+	];
 
 	return (
 		<React.Fragment>
@@ -18,16 +42,18 @@ const Tags = ({ setCurrentTags, currentTags, setPrivateImages, privateImages, ta
 			{dropdown ? <div style={{ marginTop: 8 }}>
 				<button
 					style={{ backgroundColor: 'red' }}
-					onClick={() => setCurrentTags([])}
+					onClick={() => dispatch(setCurrentTags([]))}
 				>RESET</button>
 				<button
-					style={{ backgroundColor: privateImages ? 'red' : 'inherit' }}
-					onClick={() => setPrivateImages(!privateImages)}
+					style={{ backgroundColor: privateEnabled ? 'red' : 'inherit' }}
+					onClick={() => {
+						dispatch(togglePrivateEnabled());
+						dispatch(setCurrentPosts());
+					}}
 				>PRIVATE</button>
 				<button style={{ marginBottom: 8 }} onClick={() => {
-					setPosts(prevPosts => [...prevPosts.sort(() => Math.random() - 0.5), prevPosts[0]]);
-					setPosts(prevPosts => prevPosts.slice(0, -1));
-					setPrivatePosts(prevPrivatePosts => [...prevPrivatePosts.sort(() => Math.random() - 0.5)]);
+					dispatch(setPosts(posts.sort(() => Math.random() - 0.5)));
+					dispatch(setPrivateEnabled(privatePosts.sort(() => Math.random() - 0.5)));
 				}}>Randomize</button>
 
 				<input type="text" value={filter} onChange={e => setFilter(e.target.value)} />
@@ -37,18 +63,17 @@ const Tags = ({ setCurrentTags, currentTags, setPrivateImages, privateImages, ta
 					scrollbarWidth: 'none'
 				}}>
 					{ctwp.map(tag => {
-						const toggleTag = () => setCurrentTags(currentTags.includes(tag) ? currentTags.filter(t => t !== tag) : [...currentTags, tag]);
 						if (tag.toLowerCase().includes(filter)) return <button
 							style={{ backgroundColor: currentTags.includes(tag) ? 'lime' : 'inherit' }}
 							key={tag}
-							onClick={() => toggleTag()}
+							onClick={() => dispatch(toggleTag(tag))}
 						>{tag}</button>;
 						return <React.Fragment></React.Fragment>;
 					})}
 				</div>
 			</div> : <React.Fragment></React.Fragment>
 			}
-		</React.Fragment >
+		</React.Fragment>
 	);
 };
 

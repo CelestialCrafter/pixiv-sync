@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { VisibleImage } from 'react-visible-image';
+import { useSelector } from 'react-redux';
+
+import { selectAllPosts, selectPrivateEnabled } from '../slices/posts';
+import { selectAllTags } from '../slices/tags';
 
 const MemoizedVisibleImage = React.memo(VisibleImage);
 
@@ -8,28 +12,28 @@ const calculateNewDimensions = (sourceWidth, sourceHeight, maxWidth) => {
 	return { width: sourceWidth * ratio, height: sourceHeight * ratio };
 };
 
-const Image = ({ posts, i, page, privateImages, forceLoad, setLoaded, tags }) => {
+// @TODO add a seperate image viewer in the sidebar for singular images, and show all of the image pages
+
+const Image = ({ i, forceLoad, setLoaded }) => {
+	const privateEnabled = useSelector(selectPrivateEnabled);
+	const tags = useSelector(selectAllTags);
+	const posts = useSelector(selectAllPosts);
+
 	const post = posts[i];
 	const enTagsString = post.tags.map(tag => tags[tag]).filter(t => t).join(', ');
-	const [topPx, setTopPx] = useState(0);
 
 	const rowSize = 4;
 	const imageWidth = window.innerWidth * 0.85 / rowSize;
 	const originalColumn = i % rowSize;
-	useEffect(() => {
-		let topPxTemp = 0;
+	let topPx = 0;
 
-		for (let newI = 0; newI < i; newI++) {
-			const column = newI % rowSize;
-			if (column !== originalColumn) continue;
+	for (let newI = 0; newI < i; newI++) {
+		const column = newI % rowSize;
+		if (column !== originalColumn) continue;
 
-			const newPost = posts[newI];
-			topPxTemp += calculateNewDimensions(newPost.width, newPost.height, imageWidth).height;
-		}
-
-
-		setTopPx(topPxTemp);
-	}, [i, imageWidth, originalColumn, posts]);
+		const newPost = posts[newI];
+		topPx += calculateNewDimensions(newPost.width, newPost.height, imageWidth).height;
+	}
 
 	return <MemoizedVisibleImage
 		forceShow={forceLoad}
@@ -44,9 +48,9 @@ const Image = ({ posts, i, page, privateImages, forceLoad, setLoaded, tags }) =>
 			left: i % rowSize * (imageWidth) + (window.innerWidth * 0.15)
 		}}
 		className="image"
-		src={`http://localhost/${privateImages ? 'private' : 'images'}/${post.id}-${page}.jpg`}
+		src={`http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg`}
 		title={`${post.id} - ${enTagsString}`}
-	/>
+	/>;
 };
 
 export default Image;

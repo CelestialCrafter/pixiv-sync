@@ -14,7 +14,9 @@ const app = express();
 const server = createServer(app);
 const io = ioWrapper(server);
 
-const devProxy = proxy('localhost:3000', {
+const devURI = 'localhost:3000';
+
+const devProxy = proxy(devURI, {
 	proxyReqPathResolver: req => url.parse(req.originalUrl).path
 });
 
@@ -71,7 +73,7 @@ io.on('connection', socket => {
 
 const start = async () => {
 	try {
-		await axios.get('http://localhost:3000');
+		await axios.get(`http://${devURI}`);
 		console.log('Using dev proxy');
 		app.use(devProxy);
 	} catch (e) {

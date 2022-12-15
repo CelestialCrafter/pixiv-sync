@@ -28,3 +28,30 @@ button {
 	position: fixed;
 	overflow-wrap: anywhere;
 }
+
+.errored, .loading {
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+}
+
+.errored h1, .loading h1 {
+	font-size: 3rem;
+	font-weight: 500;
+	margin-bottom: 0;
+}
+
+.errored code {
+	font-size: 1rem;
+}
+
+.errored h1 {
+	color: #ff6565;
+}
+
+.loading h1 {
+	color: #6565ff;
+}

@@ -39,13 +39,18 @@ io.on('connection', socket => {
 		set settings(newSettings) {
 			// eslint-disable-next-line global-require
 			const validKeys = Object.keys(require('../config.json'));
-			const validSettings = newSettings;
+			const newValidSettings = newSettings;
 
-			Object.keys(newSettings).forEach(key => (!validKeys.includes(key) ? delete validSettings[key] : null));
+			Object.keys(newSettings).forEach(key => (!validKeys.includes(key) ? delete newValidSettings[key] : null));
+
+			this.validSettings = newValidSettings;
 		},
 		// eslint-disable-next-line global-require
 		validSettings: require('../config.json')
 	};
+
+	socket.on('setSettings', newSettings => { settingsValidator.settings = newSettings; });
+	socket.on('requestSettings', () => socket.emit('settings', settingsValidator.validSettings));
 
 	socket.on('sync', () => {
 		console.log('Recieved Sync request');

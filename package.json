@@ -7,7 +7,7 @@
 	"author": "CelestialCrafter <celestialcraftermc@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"sync": "node src/sync/syncCli.js",
+		"sync": "set RUN_SYNC_IMMEDIATELY=true && node src/sync/sync.js",
 		"start": "node ."
 	},
 	"dependencies": {

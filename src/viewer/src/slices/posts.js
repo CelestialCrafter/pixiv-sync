@@ -27,7 +27,7 @@ export const postsSlice = createSlice({
 		builder.addCase(fetchPosts.pending, state => { state.postsStatus = 'loading'; })
 			.addCase(fetchPosts.fulfilled, (state, action) => {
 				state.postsStatus = 'succeeded';
-				state.posts = [...state.posts, ...action.payload];
+				state.posts = action.payload;
 			})
 			.addCase(fetchPosts.rejected, (state, action) => {
 				state.postsStatus = 'failed';
@@ -37,7 +37,7 @@ export const postsSlice = createSlice({
 		builder.addCase(fetchPrivatePosts.pending, state => { state.privatePostsStatus = 'loading'; })
 			.addCase(fetchPrivatePosts.fulfilled, (state, action) => {
 				state.privatePostsStatus = 'succeeded';
-				state.privatePosts = [...state.privatePosts, ...action.payload];
+				state.privatePosts = action.payload;
 			})
 			.addCase(fetchPrivatePosts.rejected, (state, action) => {
 				state.privatePostsStatus = 'failed';

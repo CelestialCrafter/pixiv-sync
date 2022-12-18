@@ -38,4 +38,4 @@ const Images = () => {
 	</div>;
 };
 
-export default Images;
+export default React.memo(Images);

@@ -1,3 +1,11 @@
+button {
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 3px;
+	margin: 2px;
+	background-color: inherit;
+}
+
 .syncData {
 	max-height: 30vh;
 	overflow-y: auto;
@@ -10,22 +18,26 @@
 }
 
 .syncData li {
-	margin-top: 4px;
+	margin-bottom: 4px;
 }
 
-button {
-	border: 1px solid black;
-	border-radius: 5px;
-	padding: 3px;
-	margin: 2px;
-	background-color: inherit;
+.menu {
+	border: none;
 }
 
-.sidebar {
+.sidebarLeftWrapper {
+	width: 15%;
+	min-width: 250px;
+	height: 100vh;
 	top: 0;
 	left: 0;
+	transition: left 0.4s;
 	padding-top: 0;
 	position: fixed;
+}
+
+.sidebarLeft {
+	background-color: white;
 	overflow-wrap: anywhere;
 }
 
@@ -54,4 +66,13 @@ button {
 
 .loading h1 {
 	color: #6565ff;
+}
+
+.setting {
+	margin: 1%;
+	width: 100%;
+}
+
+.setting input {
+	margin-left: 5px;
 }

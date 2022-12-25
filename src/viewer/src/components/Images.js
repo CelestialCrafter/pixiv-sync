@@ -1,40 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectAllCurrentPosts } from '../slices/cross';
-import { selectAllCurrentTags, selectAllTags } from '../slices/tags';
+import { selectAllCurrentPosts } from '../slices/posts';
+import { selectAllCurrentTags } from '../slices/tags';
 
 import Image from './Image';
 
+import tags from '../data/tags.json';
+
+const debounce = (fn, delay) => {
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => { fn.apply(this, args); }, delay);
+	};
+};
+
 const Images = () => {
-	const tags = useSelector(selectAllTags);
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+	useEffect(() => {
+		const listener = debounce(() => setWindowWidth(window.innerWidth), 100);
+
+		window.onresize = listener;
+		return () => window.onresize = null;
+	}, []);
+
 	const currentPosts = useSelector(selectAllCurrentPosts);
 	const currentTags = useSelector(selectAllCurrentTags);
-
-	const forceLoadAmount = 25;
-	const [loadedImages, setLoadedImages] = useState(Array(forceLoadAmount).fill(false));
 
 	const postsWithTags = currentPosts.map(post => ({
 		id: post.id,
 		tagsEn: post.tags.map(tag => tags[tag]).filter(t => t) || []
 	}));
 
+
+	const getCurrentPosts = () => {
+		let visibleI = 0;
+		return currentPosts.map((post, i) => {
+			const postTags = postsWithTags.find(p => p.id === post.id).tagsEn;
+			if (currentTags.every(tag => postTags.includes(tag))) {
+				visibleI++;
+				return <Image key={post.id} i={visibleI - 1} windowWidth={windowWidth} />;
+			}
+			return false;
+		}).filter(img => img);
+	};
+
 	return <div style={{ overflowY: 'hidden' }}>
-		{
-			currentPosts.map((post, i) => {
-				const postTags = postsWithTags.find(p => p.id === post.id).tagsEn;
-				if (currentTags.every(tag => postTags.includes(tag)))
-					return <Image
-						key={post.id}
-						forceLoad={i < forceLoadAmount && !loadedImages[i]}
-						setLoaded={state => setLoadedImages(prevLoadedImages => {
-							prevLoadedImages[i] = state;
-							return prevLoadedImages;
-						})}
-						i={i}
-					/>;
-				return <React.Fragment key={post.id}></React.Fragment>;
-			})
-		}
+		{getCurrentPosts()}
 	</div>;
 };
 

@@ -1,17 +1,15 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import reduceReducers from 'reduce-reducers';
 
 import posts from './slices/posts';
 import tags from './slices/tags';
 import sync from './slices/sync';
-import cross from './slices/cross';
+import filters from './slices/filters';
+import sort from './slices/sort';
 
-const combinedReducer = combineReducers({
+export default combineReducers({
 	posts,
 	tags,
-	sync
+	sync,
+	filters,
+	sort
 });
-
-const rootReducer = reduceReducers(combinedReducer, cross);
-
-export default rootReducer;

@@ -3,8 +3,9 @@ import { VisibleImage } from 'react-visible-image';
 import { useSelector } from 'react-redux';
 
 import { selectPrivateEnabled } from '../slices/posts';
-import { selectAllTags } from '../slices/tags';
-import { selectAllCurrentPosts } from '../slices/cross';
+import { selectAllCurrentPosts } from '../slices/posts';
+
+import tags from '../data/tags.json';
 
 const calculateNewDimensions = (sourceWidth, sourceHeight, maxWidth) => {
 	const ratio = maxWidth / sourceWidth;
@@ -13,16 +14,21 @@ const calculateNewDimensions = (sourceWidth, sourceHeight, maxWidth) => {
 
 // @TODO add a seperate image viewer in a right sidebar for singular images, and show all of the image pages
 
-const Image = ({ i, forceLoad, setLoaded }) => {
+const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 	const privateEnabled = useSelector(selectPrivateEnabled);
-	const tags = useSelector(selectAllTags);
 	const posts = useSelector(selectAllCurrentPosts);
 
 	const post = posts[i];
+	const postSize = post.sizes[0];
 	const enTagsString = post.tags.map(tag => tags[tag]).filter(t => t).join(', ');
 
-	const rowSize = window.innerWidth < 640 ? 3 : 4;
-	const imageWidth = window.innerWidth / rowSize;
+	let rowSize;
+	if (windowWidth <= 480) rowSize = 1;
+	else if (windowWidth <= 640) rowSize = 2;
+	else if (windowWidth <= 960) rowSize = 3;
+	else rowSize = 4;
+
+	const imageWidth = windowWidth / rowSize;
 	const originalColumn = i % rowSize;
 	let topPx = 0;
 
@@ -30,15 +36,13 @@ const Image = ({ i, forceLoad, setLoaded }) => {
 		const column = newI % rowSize;
 		if (column !== originalColumn) continue;
 
-		const newPost = posts[newI];
-		topPx += calculateNewDimensions(newPost.width, newPost.height, imageWidth).height;
+		const newPostSize = posts[newI].sizes[0];
+		topPx += calculateNewDimensions(newPostSize.width, newPostSize.height, imageWidth).height;
 	}
 
-	let { width, height } = calculateNewDimensions(post.width, post.height, imageWidth);
+	let { width, height } = calculateNewDimensions(postSize.width, postSize.height, imageWidth);
 
 	return <VisibleImage
-		forceShow={forceLoad}
-		onLoad={() => setLoaded ? setLoaded(true) : null}
 		onClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank')}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{

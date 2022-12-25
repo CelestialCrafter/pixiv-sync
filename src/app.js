@@ -22,8 +22,6 @@ const devProxy = proxy(devURI, {
 
 app.use(cors());
 
-app.use('/data', express.static(join(__dirname, '../data')));
-
 const imagesPath = join(pictureDirectory, 'images/pixiv');
 const privatePath = join(pictureDirectory, 'private/pixiv');
 
@@ -32,29 +30,37 @@ app.use('/private', express.static(privatePath));
 
 app.get('/config', (req, res) => res.sendFile(join(__dirname, '../config.json')));
 
+const debounce = (fn, delay) => {
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => fn.apply(this, args), delay);
+	};
+};
+
+const settingsValidator = {
+	set settings(newSettings) {
+		// eslint-disable-next-line global-require
+		const validKeys = Object.keys(require('../config.json'));
+		const newValidSettings = newSettings;
+
+		Object.keys(newSettings).forEach(key => (!validKeys.includes(key) ? delete newValidSettings[key] : null));
+
+		this.validSettings = newValidSettings;
+	},
+	// eslint-disable-next-line global-require
+	validSettings: require('../config.json')
+};
+
 io.on('connection', socket => {
 	console.log('Connected to client');
-
-	const settingsValidator = {
-		set settings(newSettings) {
-			// eslint-disable-next-line global-require
-			const validKeys = Object.keys(require('../config.json'));
-			const newValidSettings = newSettings;
-
-			Object.keys(newSettings).forEach(key => (!validKeys.includes(key) ? delete newValidSettings[key] : null));
-
-			this.validSettings = newValidSettings;
-		},
-		// eslint-disable-next-line global-require
-		validSettings: require('../config.json')
-	};
 
 	socket.on('setSettings', newSettings => { settingsValidator.settings = newSettings; });
 	socket.on('requestSettings', () => socket.emit('settings', settingsValidator.validSettings));
 
 	socket.on('sync', () => {
 		console.log('Recieved Sync request');
-		socket.emit('settings', settingsValidator.validSettings);
+		io.emit('settings', settingsValidator.validSettings);
 
 		const child = fork('src/sync/sync.js', {
 			env: {
@@ -67,8 +73,19 @@ io.on('connection', socket => {
 		child.stdout.pipe(process.stdout);
 		child.stderr.pipe(process.stderr);
 
-		child.stdout.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(data => socket.emit('syncData', data)));
-		child.stderr.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(data => socket.emit('syncData', data)));
+		let queue = [];
+		const debouncedEmitData = debounce(() => {
+			io.emit('syncData', queue);
+			queue = [];
+		}, 150);
+
+		const emitData = data => {
+			queue.push(data);
+			debouncedEmitData();
+		};
+
+		child.stdout.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(emitData));
+		child.stderr.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(emitData));
 
 		child.send(settingsValidator.validSettings);
 	});

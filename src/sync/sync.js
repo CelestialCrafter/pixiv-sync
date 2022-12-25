@@ -6,7 +6,7 @@ const {
 } = require('fs');
 const { join } = require('path');
 
-const downloadTranslationsWrapper = require('./actions/translations');
+const downloadIndividualWrapper = require('./actions/individualPost');
 const removeUnlikedWrapper = require('./actions/unliked');
 const tryDownloadsWrapper = require('./actions/tryDownloads');
 const getPostsWrapper = require('./actions/getPosts');
@@ -24,9 +24,9 @@ const sync = async (overrideSettings = {}) => {
 		config[key] = overrideSettings[key];
 	});
 
-	const postCachePath = join(__dirname, '../../data/', config.privateImages ? 'privatePosts.json' : 'posts.json');
+	const postCachePath = join(config.dataDirectory, config.privateImages ? 'privatePosts.json' : 'posts.json');
 
-	const downloadTranslations = downloadTranslationsWrapper(config);
+	const downloadIndividual = downloadIndividualWrapper(config);
 	const removeUnliked = removeUnlikedWrapper(config);
 	const tryDownloads = tryDownloadsWrapper(config);
 	const getPosts = getPostsWrapper(config);
@@ -49,7 +49,7 @@ const sync = async (overrideSettings = {}) => {
 
 	await removeUnliked(posts);
 	await tryDownloads(posts);
-	await downloadTranslations(posts, { headers });
+	await downloadIndividual(posts, { headers });
 	console.log('Finished Sync');
 	process.removeAllListeners();
 };

@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-	selectAllPosts,
-	selectAllPrivatePosts,
 	selectPrivateEnabled,
-	setPosts,
-	setPrivateEnabled,
 	togglePrivateEnabled
 } from '../slices/posts';
-import { setCurrentPosts, selectAllCurrentPosts } from '../slices/cross';
-import { selectAllCurrentTags, selectAllTags, setCurrentTags, toggleTag } from '../slices/tags';
+import { updateCurrentPosts, selectAllCurrentPosts } from '../slices/posts';
+import { selectAllCurrentTags, setCurrentTags, toggleTag } from '../slices/tags';
+
+import tags from '../data/tags.json';
 
 const Tags = () => {
-	const privatePosts = useSelector(selectAllPrivatePosts);
-	const posts = useSelector(selectAllPosts);
-	const tags = useSelector(selectAllTags);
 	const currentTags = useSelector(selectAllCurrentTags);
 	const currentPosts = useSelector(selectAllCurrentPosts);
 	const privateEnabled = useSelector(selectPrivateEnabled);
@@ -42,19 +37,18 @@ const Tags = () => {
 			{dropdown ? <div style={{ marginTop: 8 }}>
 				<button
 					style={{ backgroundColor: 'red' }}
-					onClick={() => dispatch(setCurrentTags([]))}
+					onClick={() => {
+						dispatch(setCurrentTags([]));
+						dispatch(updateCurrentPosts());
+					}}
 				>RESET</button>
 				<button
 					style={{ backgroundColor: privateEnabled ? 'red' : 'inherit' }}
 					onClick={() => {
 						dispatch(togglePrivateEnabled());
-						dispatch(setCurrentPosts());
+						dispatch(updateCurrentPosts());
 					}}
 				>PRIVATE</button>
-				<button style={{ marginBottom: 8 }} onClick={() => {
-					dispatch(setPosts(posts.sort(() => Math.random() - 0.5)));
-					dispatch(setPrivateEnabled(privatePosts.sort(() => Math.random() - 0.5)));
-				}}>Randomize</button>
 
 				<input type="text" value={filter} onChange={e => setFilter(e.target.value)} />
 				<div style={{
@@ -66,7 +60,10 @@ const Tags = () => {
 						if (tag.toLowerCase().includes(filter)) return <button
 							style={{ backgroundColor: currentTags.includes(tag) ? 'lime' : 'inherit' }}
 							key={tag}
-							onClick={() => dispatch(toggleTag(tag))}
+							onClick={() => {
+								dispatch(toggleTag(tag));
+								dispatch(updateCurrentPosts());
+							}}
 						>{tag}</button>;
 						return <React.Fragment></React.Fragment>;
 					})}

@@ -1,26 +1,38 @@
-import React, { createRef } from 'react';
-import { connect } from 'react-redux';
-import { setSyncSettings } from '../slices/sync';
+import React, { createRef, useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-class Settings extends React.Component {
-	constructor(props) {
-		super(props);
-		const settingRefs = {};
+import { selectHeightFilter, selectWidthFilter, setHeightFilter, setWidthFilter } from '../slices/filters';
+import { selectSyncSettings, setSyncSettings } from '../slices/sync';
+import { selectSortType, selectSortState, nextSortState } from '../slices/sort';
+import { updateCurrentPosts } from '../slices/posts';
 
-		Object.keys(props.settings).forEach(key => {
-			settingRefs[key] = createRef();
-		});
+import Range from './Range';
+import './Range.css';
 
-		this.state = settingRefs;
+const Settings = ({ socket }) => {
+	const dispatch = useDispatch();
+	const [width, setWidth] = useState();
+	const [height, setHeight] = useState();
+	const [settingRefs, setSettingsRefs] = useState({});
 
-		this.handleSubmitSettings = this.handleSubmitSettings.bind(this);
-	}
+	const settings = useSelector(selectSyncSettings);
 
-	handleSubmitSettings() {
+	const widthFilter = useSelector(selectWidthFilter);
+	const heightFilter = useSelector(selectHeightFilter);
+	const sortType = useSelector(selectSortType);
+	const sortState = useSelector(selectSortState);
+
+	const handleSubmitFilters = () => {
+		dispatch(setWidthFilter({ min: width[0], max: width[1] }));
+		dispatch(setHeightFilter({ min: height[0], max: height[1] }));
+		dispatch(updateCurrentPosts());
+	};
+
+	const handleSubmitSettings = () => {
 		let newSettings = {};
 
-		Object.keys(this.state).forEach(key => {
-			const ref = this.state[key];
+		Object.keys(settingRefs).forEach(key => {
+			const ref = settingRefs[key];
 			if (ref.current) {
 				const type = ref.current.getAttribute('type');
 
@@ -30,53 +42,69 @@ class Settings extends React.Component {
 			}
 		});
 
-		this.props.dispatch(setSyncSettings(newSettings));
-		this.props.socket.emit('setSettings', newSettings);
-	}
+		dispatch(setSyncSettings(newSettings));
+		socket.emit('setSettings', newSettings);
+	};
 
-	componentDidMount() {
-		console.log(this.props.socket);
-		this.props.socket.on('settings', newSettings => {
-			Object.keys(this.state).forEach(key => {
-				const ref = this.state[key];
+	const addRefs = useCallback(() => {
+		const settingRefs = {};
+		Object.keys(settings).forEach(key => settingRefs[key] = createRef());
+		setSettingsRefs(settingRefs);
+	}, [settings]);
+
+	useEffect(() => {
+		socket.on('settings', newSettings => {
+			Object.keys(settingRefs).forEach(key => {
+				const ref = settingRefs[key];
+				if (ref.current) {
+					const type = ref.current.getAttribute('type');
+
+					if (type === 'checkbox') ref.current.checked = newSettings[key];
+					else ref.current.value = newSettings[key];
+				}
 				if (ref.current) ref.current.value = newSettings[key];
 			});
-			this.props.dispatch(setSyncSettings(newSettings));
+			dispatch(setSyncSettings(newSettings));
 		});
-	}
+	}, [dispatch, settingRefs, socket]);
 
-	render() {
-		const { settings } = this.props;
+	useEffect(() => addRefs(), [addRefs]);
 
-		return <React.Fragment>
-			{Object.keys(settings).map(key => {
-				const type = typeof settings[key];
-				let formType = null;
-				let style = {};
+	return <div className="setting">
+		{Object.keys(settings).map(key => {
+			const type = typeof settings[key];
+			let formType = null;
+			let style = {};
 
-				if (type === 'number') {
-					formType = 'number';
-					style = { width: '20%' };
-				} else if (type === 'string') {
-					formType = 'text';
-					style = { width: '50%' };
-				} else if (type === 'boolean') formType = 'checkbox';
+			if (type === 'number') {
+				formType = 'number';
+				style = { width: '20%' };
+			} else if (type === 'string') {
+				formType = 'text';
+				style = { width: '40%' };
+			} else if (type === 'boolean') formType = 'checkbox';
 
-				return <div className="setting" key={key}>
-					<span>{key}</span>
-					<input
-						style={style}
-						ref={this.state[key]}
-						type={formType}
-						defaultValue={settings[key]}
-					/>
-				</div>;
-			})}
-			<button onClick={this.handleSubmitSettings}>Submit Settings</button>
-		</React.Fragment>;
-	}
-}
+			return <div key={key}>
+				<span>{key}</span>
+				<input
+					style={style}
+					ref={settingRefs[key]}
+					type={formType}
+					defaultValue={formType !== 'checkbox' ? settings[key] : null}
+					defaultChecked={formType === 'checkbox' ? settings[key] : null}
+				/>
+			</div>;
+		})}
+		<br />
+		<span>{sortType} - </span><button onClick={() => {
+			dispatch(nextSortState());
+			dispatch(updateCurrentPosts());
+		}}>{sortState === 0 ? 'Off' : sortState === 1 ? 'Dec' : 'Asc'}</button>
+		<Range display="Width" min={widthFilter.minRange} max={widthFilter.maxRange} onChange={useCallback(value => setWidth(value), [])} />
+		<Range display="Height" min={heightFilter.minRange} max={heightFilter.maxRange} onChange={useCallback(value => setHeight(value), [])} /><br />
+		<button onClick={handleSubmitFilters}>Submit Filters</button>
+		<button onClick={handleSubmitSettings}>Submit Settings</button><br />
+	</div>;
+};
 
-const mapStateToProps = state => ({ settings: state.sync.settings });
-
-export default connect(mapStateToProps)(Settings);
+export default Settings;

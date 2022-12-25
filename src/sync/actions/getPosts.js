@@ -21,10 +21,7 @@ const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 			tags: post.tags
 		});
 
-		const initialResponse = await axios.get(generateURL(), { headers }).catch(err => {
-			console.log(err.request);
-			throw new Error(err.toString());
-		});
+		const initialResponse = await axios.get(generateURL(), { headers }).catch(err => { throw new Error(err.toString()); });
 
 		likes = initialResponse.data.body.total;
 		posts = posts.concat(initialResponse.data.body.works)

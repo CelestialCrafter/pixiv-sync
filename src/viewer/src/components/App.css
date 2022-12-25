@@ -8,7 +8,7 @@ button {
 
 .syncData {
 	max-height: 30vh;
-	overflow-y: auto;
+	overflow: hidden;
 	margin: 0;
 	scrollbar-width: none;
 	overflow-anchor: auto;

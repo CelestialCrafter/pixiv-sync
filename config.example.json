@@ -1,9 +1,10 @@
 {
 	"useCache": false,
-	"translateTags": true,
+	"downloadIndividualData": false,
 	"privateImages": false,
 	"userId": 0,
 	"requestCooldown": 500,
 	"batchSize": 6,
+	"startIndividualFrom": null,
 	"pictureDirectory": "/home/user/Pictures/art"
 }

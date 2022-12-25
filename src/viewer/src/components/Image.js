@@ -48,8 +48,8 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 		alt={`${post.id} - ${enTagsString}`}
 		style={{
 			position: 'absolute',
-			width: width,
-			height: height,
+			width,
+			height,
 			top: topPx,
 			left: i % rowSize * imageWidth
 		}}

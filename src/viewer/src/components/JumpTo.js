@@ -1,11 +1,39 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import './JumpTo.css';
+
+const debounce = (fn, delay) => {
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => fn.apply(this, args), delay);
+	};
+};
 
 const JumpTo = ({ imagesRef }) => {
 	const [dropdown, setDropdown] = useState(false);
 	const [error, setError] = useState('');
 	const jumpToInputRef = useRef();
+
+	useEffect(() => {
+		const loadedListener = () => {
+			const scrollValue = localStorage.getItem('scroll');
+			if (scrollValue) window.scroll(0, scrollValue);
+			document.removeEventListener('DOMContentLoaded', loadedListener);
+		};
+
+		document.addEventListener('DOMContentLoaded', loadedListener);
+
+		const listener = () => localStorage.setItem('scroll', window.scrollY);
+		const debouncedListener = debounce(listener, 600);
+
+		window.addEventListener('beforeunload', listener);
+		window.addEventListener('scroll', debouncedListener);
+		return () => {
+			window.removeEventListener('beforeunload', listener);
+			window.removeEventListener('scroll', debouncedListener);
+		};
+	}, []);
 
 	return <React.Fragment>
 		{dropdown ? <div className="dropdown">

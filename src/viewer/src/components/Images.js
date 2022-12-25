@@ -21,8 +21,8 @@ const Images = ({ imagesRef }) => {
 	useEffect(() => {
 		const listener = debounce(() => setWindowWidth(window.innerWidth), 100);
 
-		window.onresize = listener;
-		return () => window.onresize = null;
+		window.addEventListener('resize', listener);
+		return () => window.removeEventListener('resize', listener);
 	}, []);
 
 	const currentPosts = useSelector(selectAllCurrentPosts);

@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 
 import Images from './Images';
 import Sidebar from './Sidebar';
+import JumpTo from './JumpTo';
 import './App.css';
 
 import { fetchSettings } from '../slices/sync';
@@ -13,6 +14,7 @@ const socket = io(`ws://${process.env.REACT_APP_API_IP}`);
 
 const App = () => {
 	const dispatch = useDispatch();
+	const imagesRef = useRef();
 
 	const syncSettingsStatus = useSelector(state => state.sync.status);
 
@@ -23,7 +25,8 @@ const App = () => {
 	}, [dispatch, syncSettingsStatus]);
 
 	return <React.Fragment>
-		<Images />
+		<Images imagesRef={imagesRef} />
+		<JumpTo imagesRef={imagesRef} />
 
 		<Sidebar socket={socket} />
 	</React.Fragment>;

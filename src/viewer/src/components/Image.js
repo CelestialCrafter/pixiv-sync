@@ -44,6 +44,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 
 	return <VisibleImage
 		onClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank')}
+		id={post.id}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{
 			position: 'absolute',

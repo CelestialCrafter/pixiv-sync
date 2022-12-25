@@ -5,6 +5,6 @@
 	"userId": 0,
 	"requestCooldown": 500,
 	"batchSize": 6,
-	"startIndividualFrom": null,
+	"startIndividualFrom": "",
 	"pictureDirectory": "/home/user/Pictures/art"
 }

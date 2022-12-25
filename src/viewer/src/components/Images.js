@@ -15,7 +15,7 @@ const debounce = (fn, delay) => {
 	};
 };
 
-const Images = () => {
+const Images = ({ imagesRef }) => {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
 	useEffect(() => {
@@ -46,7 +46,7 @@ const Images = () => {
 		}).filter(img => img);
 	};
 
-	return <div style={{ overflowY: 'hidden' }}>
+	return <div ref={imagesRef} style={{ overflowY: 'hidden' }}>
 		{getCurrentPosts()}
 	</div>;
 };

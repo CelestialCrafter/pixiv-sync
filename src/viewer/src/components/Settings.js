@@ -7,7 +7,6 @@ import { selectSortType, selectSortState, nextSortState } from '../slices/sort';
 import { updateCurrentPosts } from '../slices/posts';
 
 import Range from './Range';
-import './Range.css';
 
 const Settings = ({ socket }) => {
 	const dispatch = useDispatch();

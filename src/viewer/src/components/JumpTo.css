@@ -1,0 +1,33 @@
+.jump {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	height: 5vh;
+	width: 5vh;
+	margin: 4px;
+	background-color: #e57373;
+	border-radius: 50%;
+	border: none;
+	display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jump i {
+	color: white;
+}
+
+.dropdown {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	margin: 4px;
+	padding: 8px;
+	background-color: white;
+	margin-bottom: calc(5vh + 0.5%);
+}
+
+.dropdown p {
+	color: #e57373;
+	margin: 0;
+}

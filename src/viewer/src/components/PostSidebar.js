@@ -10,15 +10,16 @@ const RightSidebar = () => {
 	const post = useSelector(selectSelectedPost);
 
 	return post ? <React.Fragment>
-		<a
+		<button
 			target="_blank"
 			rel="noreferrer"
-			style={{
-				padding: 4,
-				paddingTop: 0
-			}}
-			href={`https://pixiv.net/artworks/${post.id}`}
-		>Link</a><br />
+			onClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
+		>Open Post</button>
+		<button
+			target="_blank"
+			rel="noreferrer"
+			onClick={() => alert('Not Implemented!')}
+		>Open Relevant Posts</button>
 		<ul className="imageList">
 			{Array(post.pageCount).fill(0).map((_, i) =>
 				<img

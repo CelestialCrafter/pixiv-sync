@@ -1,52 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
 
-import { selectAllSyncData, setSyncData, addSyncData } from '../slices/sync';
+import './Sidebar.css';
+import LeftSidebar from './SettingsSidebar';
+import PostSidebar from './PostSidebar';
 
-import Tags from './Tags';
-import Settings from './Settings';
-
-const Sidebar = ({ socket }) => {
+const Sidebar = props => {
 	const [hidden, setHidden] = useState(true);
-	const dispatch = useDispatch();
-	const syncDataRef = useRef(null);
+	const [sidebar, setSidebar] = useState('left');
 
-	const syncData = useSelector(selectAllSyncData);
+	const padding = sidebar === 'right' ? 0 : 4;
 
-	useEffect(() => {
-		socket.on('syncData', chunk => {
-			chunk.forEach(data => dispatch(addSyncData(data)));
-
-			const syncDataElement = syncDataRef.current;
-			syncDataElement.scroll(0, syncDataElement.scrollHeight);
-		});
-
-		return () => {
-			socket.off('connect');
-			socket.off('settings');
-			socket.off('syncData');
-		};
-	}, [dispatch, socket]);
-
-	return <div className="sidebarLeftWrapper" style={{ width: hidden ? 0 : null, height: hidden ? 0 : null, backgroundColor: hidden ? 'inherit' : 'white' }}>
+	return <div className="sidebarWrapper" style={{
+		width: hidden ? 0 : sidebar === 'right' ? '20%' : '15%',
+		height: hidden ? 0 : null,
+		backgroundColor: hidden ? 'inherit' : 'white'
+	}}>
 		<button
-			className="menu"
-			onClick={() => setHidden(!hidden)}
+			onClick={() => setHidden(prevHidden => !prevHidden)}
+			style={{ border: 'none' }}
 		><i className="material-icons">menu</i></button>
+		<button
+			style={{
+				display: hidden ? 'none' : 'unset',
+				border: 'none'
+			}}
+			onClick={() => setSidebar(prevSidebar => prevSidebar === 'left' ? 'right' : 'left')}
+		><i className="material-icons">swap_horiz</i></button>
 
-		<div className="sidebarLeft" style={{
-			display: hidden ? 'none' : 'inherit',
-			padding: 4,
+		<div className="sidebar" style={{
+			display: hidden ? 'none' : 'block',
+			paddingLeft: padding,
+			paddingRight: padding,
+			paddingBottom: padding,
 			paddingTop: 0,
-			marginBottom: 8
+			marginBottom: 8,
 		}}>
-			<Settings socket={socket} />
-
-			<button onClick={() => socket.emit('sync')}>Sync</button>
-			<button onClick={() => dispatch(setSyncData([]))}>Clear Output</button>
-
-			<Tags />
-			<ul className="syncData" ref={syncDataRef} style={{ marginTop: 4 }}>{syncData.map((data, i) => <li key={i}>{data}</li>)}</ul>
+			{sidebar === 'left' ? <LeftSidebar {...props} /> : <PostSidebar {...props} />}
 		</div>
 	</div>;
 };

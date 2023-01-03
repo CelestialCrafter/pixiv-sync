@@ -8,6 +8,8 @@ import { updateCurrentPosts } from '../slices/posts';
 
 import Range from './Range';
 
+import './Settings.css';
+
 const Settings = ({ socket }) => {
 	const dispatch = useDispatch();
 	const [width, setWidth] = useState();

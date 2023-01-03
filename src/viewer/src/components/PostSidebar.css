@@ -1,0 +1,12 @@
+.imageList {
+	height: 70vh;
+	margin: 0;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	margin-bottom: 8px;
+	padding: 0;
+}
+
+.imageList li {
+	margin-bottom: 4px;
+}

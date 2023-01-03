@@ -1,9 +1,8 @@
 import React from 'react';
 import { VisibleImage } from 'react-visible-image';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { selectPrivateEnabled } from '../slices/posts';
-import { selectAllCurrentPosts } from '../slices/posts';
+import { selectPrivateEnabled, selectAllCurrentPosts, setSelectedPost } from '../slices/posts';
 
 import tags from '../data/tags.json';
 
@@ -17,6 +16,7 @@ const calculateNewDimensions = (sourceWidth, sourceHeight, maxWidth) => {
 const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 	const privateEnabled = useSelector(selectPrivateEnabled);
 	const posts = useSelector(selectAllCurrentPosts);
+	const dispatch = useDispatch();
 
 	const post = posts[i];
 	const postSize = post.sizes[0];
@@ -43,7 +43,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 	let { width, height } = calculateNewDimensions(postSize.width, postSize.height, imageWidth);
 
 	return <VisibleImage
-		onClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank')}
+		onClick={() => dispatch(setSelectedPost(post))}
 		id={post.id}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{
@@ -53,7 +53,6 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 			top: topPx,
 			left: i % rowSize * imageWidth
 		}}
-		className="image"
 		src={`http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg`}
 		title={`${post.id} - ${enTagsString}`}
 	/>;

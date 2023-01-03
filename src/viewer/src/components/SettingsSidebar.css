@@ -1,0 +1,14 @@
+.syncData {
+	max-height: 30vh;
+	overflow: hidden;
+	margin: 0;
+	scrollbar-width: none;
+	overflow-anchor: auto;
+	list-style-type: none;
+	padding-left: 4px;
+	margin-bottom: 8px;
+}
+
+.syncData li {
+	margin-bottom: 4px;
+}

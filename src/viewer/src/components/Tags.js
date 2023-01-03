@@ -68,8 +68,7 @@ const Tags = () => {
 						return <React.Fragment></React.Fragment>;
 					})}
 				</div>
-			</div> : <React.Fragment></React.Fragment>
-			}
+			</div> : <React.Fragment></React.Fragment>}
 		</React.Fragment>
 	);
 };

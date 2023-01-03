@@ -9,7 +9,8 @@ import tags from '../data/tags.json';
 
 export const initialState = {
 	currentPosts: [],
-	privateEnabled: false
+	privateEnabled: false,
+	selectedPost: null
 };
 
 export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', async (_arg, thunkAPI) => {
@@ -71,13 +72,16 @@ export const postsSlice = createSlice({
 	initialState,
 	reducers: {
 		setPrivateEnabled: (state, action) => { state.privateEnabled = action.payload; },
-		togglePrivateEnabled: state => { state.privateEnabled = !state.privateEnabled; }
+		togglePrivateEnabled: state => { state.privateEnabled = !state.privateEnabled; },
+		setSelectedPost: (state, action) => { state.selectedPost = action.payload; },
+		deleteSelectedPost: state => { state.selectedPost = null; }
 	},
 	extraReducers: builder => builder.addCase(updateCurrentPosts.fulfilled, (state, action) => { state.currentPosts = action.payload; })
 });
 
+export const selectSelectedPost = state => state.posts.selectedPost;
 export const selectPrivateEnabled = state => state.posts.privateEnabled;
 export const selectAllCurrentPosts = state => state.posts.currentPosts;
 
-export const { setPosts, setPrivatePosts, setPrivateEnabled, togglePrivateEnabled } = postsSlice.actions;
+export const { setPosts, setPrivatePosts, setPrivateEnabled, togglePrivateEnabled, setSelectedPost, deleteSelectedPost } = postsSlice.actions;
 export default postsSlice.reducer;

@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
 	selectPrivateEnabled,
 	togglePrivateEnabled
-} from '../slices/posts';
-import { updateCurrentPosts, selectAllCurrentPosts } from '../slices/posts';
-import { selectAllCurrentTags, setCurrentTags, toggleTag } from '../slices/tags';
+} from '../../../slices/posts';
+import { updateCurrentPosts, selectAllCurrentPosts } from '../../../slices/posts';
+import { selectAllCurrentTags, setCurrentTags, toggleTag } from '../../../slices/tags';
 
-import tags from '../data/tags.json';
+import tags from '../../../data/tags.json';
 
 const Tags = () => {
 	const currentTags = useSelector(selectAllCurrentTags);

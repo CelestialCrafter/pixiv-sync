@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 
 import Images from './Images';
-import Sidebar from './Sidebar';
+import Sidebar from './sidebar/Sidebar';
 import JumpTo from './JumpTo';
 import './App.css';
 

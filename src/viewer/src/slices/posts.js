@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-import { updateFilters } from './filters';
+import axios from 'axios';
 
 import likes from '../data/likes.json';
 import posts from '../data/posts.json';
@@ -9,17 +8,33 @@ import tags from '../data/tags.json';
 
 export const initialState = {
 	currentPosts: [],
+	postsOverride: [],
 	privateEnabled: false,
 	selectedPost: null
 };
 
-export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', async (_arg, thunkAPI) => {
+export const setRelevantPosts = createAsyncThunk('posts/setRelevantPosts', async (postId, thunkAPI) => {
 	const { dispatch } = thunkAPI;
+
+	const relevantPosts = await axios({
+		url: `http://${process.env.REACT_APP_API_IP}/relevant/${postId}`,
+		method: 'get'
+	});
+
+	dispatch(setPostsOverride(relevantPosts.data));
+	dispatch(updateCurrentPosts());
+});
+
+export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', async (_arg, thunkAPI) => {
 	const state = thunkAPI.getState();
 
 	let newPosts = [];
+	let usedPosts = [];
 
-	const usedPosts = state.posts.privateEnabled ? privatePosts : posts;
+	if (state.posts.postsOverride[0]) usedPosts = state.posts.postsOverride;
+	else if (state.posts.privateEnabled) usedPosts = privatePosts.map(post => ({ ...post, local: true }));
+	else usedPosts = posts.map(post => ({ ...post, local: true }));
+
 	const postsWithTags = usedPosts.map(post => ({
 		id: post.id,
 		tagsEn: post.tags.map(tag => tags[tag]).filter(t => t)
@@ -30,20 +45,6 @@ export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', a
 			const postTags = postsWithTags.find(p => p.id === post.id)?.tagsEn;
 			return state.tags.currentTags.every(tag => postTags.includes(tag));
 		});
-
-	dispatch(updateFilters(newPosts));
-
-	newPosts = newPosts.filter(post => {
-		const { width, height } = post.sizes[0];
-		const { width: widthFilter, height: heightFilter } = state.filters;
-
-		if (width < widthFilter.min) return false;
-		else if (height < heightFilter.min) return false;
-		else if (width > widthFilter.max) return false;
-		else if (height > heightFilter.max) return false;
-
-		return true;
-	});
 
 	const sortValue = likes;
 	if (state.sort.state === 1) newPosts.sort((a, b) => {
@@ -71,10 +72,11 @@ export const postsSlice = createSlice({
 	name: 'posts',
 	initialState,
 	reducers: {
+		setPostsOverride: (state, action) => { state.postsOverride = action.payload; },
 		setPrivateEnabled: (state, action) => { state.privateEnabled = action.payload; },
 		togglePrivateEnabled: state => { state.privateEnabled = !state.privateEnabled; },
 		setSelectedPost: (state, action) => { state.selectedPost = action.payload; },
-		deleteSelectedPost: state => { state.selectedPost = null; }
+		deleteSelectedPost: state => { state.selectedPost = null; },
 	},
 	extraReducers: builder => builder.addCase(updateCurrentPosts.fulfilled, (state, action) => { state.currentPosts = action.payload; })
 });
@@ -83,5 +85,5 @@ export const selectSelectedPost = state => state.posts.selectedPost;
 export const selectPrivateEnabled = state => state.posts.privateEnabled;
 export const selectAllCurrentPosts = state => state.posts.currentPosts;
 
-export const { setPosts, setPrivatePosts, setPrivateEnabled, togglePrivateEnabled, setSelectedPost, deleteSelectedPost } = postsSlice.actions;
+export const { setPostsOverride, setPrivateEnabled, togglePrivateEnabled, setSelectedPost, deleteSelectedPost } = postsSlice.actions;
 export default postsSlice.reducer;

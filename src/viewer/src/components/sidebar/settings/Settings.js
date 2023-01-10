@@ -1,33 +1,20 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectHeightFilter, selectWidthFilter, setHeightFilter, setWidthFilter } from '../slices/filters';
-import { selectSyncSettings, setSyncSettings } from '../slices/sync';
-import { selectSortType, selectSortState, nextSortState } from '../slices/sort';
-import { updateCurrentPosts } from '../slices/posts';
-
-import Range from './Range';
+import { selectSyncSettings, setSyncSettings } from '../../../slices/sync';
+import { selectSortType, selectSortState, nextSortState } from '../../../slices/sort';
+import { updateCurrentPosts } from '../../../slices/posts';
 
 import './Settings.css';
 
 const Settings = ({ socket }) => {
 	const dispatch = useDispatch();
-	const [width, setWidth] = useState();
-	const [height, setHeight] = useState();
 	const [settingRefs, setSettingsRefs] = useState({});
 
 	const settings = useSelector(selectSyncSettings);
 
-	const widthFilter = useSelector(selectWidthFilter);
-	const heightFilter = useSelector(selectHeightFilter);
 	const sortType = useSelector(selectSortType);
 	const sortState = useSelector(selectSortState);
-
-	const handleSubmitFilters = () => {
-		dispatch(setWidthFilter({ min: width[0], max: width[1] }));
-		dispatch(setHeightFilter({ min: height[0], max: height[1] }));
-		dispatch(updateCurrentPosts());
-	};
 
 	const handleSubmitSettings = () => {
 		let newSettings = {};
@@ -101,9 +88,6 @@ const Settings = ({ socket }) => {
 			dispatch(nextSortState());
 			dispatch(updateCurrentPosts());
 		}}>{sortState === 0 ? 'Off' : sortState === 1 ? 'Dec' : 'Asc'}</button>
-		<Range display="Width" min={widthFilter.minRange} max={widthFilter.maxRange} onChange={useCallback(value => setWidth(value), [])} />
-		<Range display="Height" min={heightFilter.minRange} max={heightFilter.maxRange} onChange={useCallback(value => setHeight(value), [])} /><br />
-		<button onClick={handleSubmitFilters}>Submit Filters</button>
 		<button onClick={handleSubmitSettings}>Submit Settings</button><br />
 	</div>;
 };

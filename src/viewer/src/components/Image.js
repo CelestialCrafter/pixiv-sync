@@ -40,10 +40,14 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 		topPx += calculateNewDimensions(newPostSize.width, newPostSize.height, imageWidth).height;
 	}
 
+	const date = post.updateDate.replace(/-/g, '/').replace(/T/g, '/').replace(/:/g, '/').replace(/\+.+/, '');
+	const url = `https://i.pximg.net/img-master/img/${date}/${post.id}_p0_master1200.jpg`;
+
 	let { width, height } = calculateNewDimensions(postSize.width, postSize.height, imageWidth);
 
 	return <VisibleImage
 		onClick={() => dispatch(setSelectedPost(post))}
+		onDoubleClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
 		id={post.id}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{
@@ -53,7 +57,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 			top: topPx,
 			left: i % rowSize * imageWidth
 		}}
-		src={`http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg`}
+		src={post?.local ? `http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg` : url}
 		title={`${post.id} - ${enTagsString}`}
 	/>;
 };

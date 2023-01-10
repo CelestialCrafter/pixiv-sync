@@ -8,7 +8,9 @@ const axios = require('axios');
 const cors = require('cors');
 const url = require('url');
 
-const { pictureDirectory } = require('../config.json');
+const { pictureDirectory, userId } = require('../config.json');
+
+require('dotenv').config();
 
 const app = express();
 const server = createServer(app);
@@ -29,6 +31,32 @@ app.use('/images', express.static(imagesPath));
 app.use('/private', express.static(privatePath));
 
 app.get('/config', (req, res) => res.sendFile(join(__dirname, '../config.json')));
+
+app.get('/relevant/:postId', async (req, res) => {
+	const { postId } = req.params;
+	const relevantPosts = await axios({
+		url: `https://www.pixiv.net/ajax/illust/${postId}/recommend/init?limit=180&lang=en`,
+		method: 'get',
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/103.0',
+			Cookie: `PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
+		}
+	});
+
+	res.json(
+		relevantPosts.data.body.illusts
+			.filter(post => (post.isAdContainer ? null : post))
+			.filter(post => post)
+			.map(post => ({
+				id: post.id,
+				url: post.url,
+				updateDate: post.updateDate,
+				pageCount: 1,
+				tags: post.tags,
+				sizes: [{ width: post.width, height: post.height }]
+			}))
+	);
+});
 
 const debounce = (fn, delay) => {
 	let timer;
@@ -52,17 +80,21 @@ const settingsValidator = {
 	validSettings: require('../config.json')
 };
 
+let child = null;
+
 io.on('connection', socket => {
 	console.log('Connected to client');
 
 	socket.on('setSettings', newSettings => { settingsValidator.settings = newSettings; });
 	socket.on('requestSettings', () => socket.emit('settings', settingsValidator.validSettings));
 
+	socket.on('endSync', () => child?.kill());
+
 	socket.on('sync', () => {
 		console.log('Recieved Sync request');
 		io.emit('settings', settingsValidator.validSettings);
 
-		const child = fork('src/sync/sync.js', {
+		child = fork('src/sync/sync.js', {
 			env: {
 				RUN_SYNC_IMMEDIATELY: true,
 				WAIT_FOR_SETTINGS: true
@@ -86,6 +118,10 @@ io.on('connection', socket => {
 
 		child.stdout.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(emitData));
 		child.stderr.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(emitData));
+		child.on('close', () => {
+			child.stdout.removeAllListeners();
+			child.stderr.removeAllListeners();
+		});
 
 		child.send(settingsValidator.validSettings);
 	});

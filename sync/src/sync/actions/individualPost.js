@@ -34,7 +34,7 @@ const downloadIndividualWrapper = ({
 
 			likes[post.id] = response.data.body.bookmarkCount;
 
-			console.log(`Checking ${post.id}`);
+			console.log(`Checking ${post.id} - ${i + startIndex + 1}/${postsOriginal.length}`);
 			// very confusing, blame pixiv ajax api
 			response.data.body.tags.tags.forEach(tag => {
 				const nameJp = tag.tag;

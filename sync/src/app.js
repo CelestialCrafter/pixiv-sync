@@ -32,6 +32,25 @@ app.use('/private', express.static(privatePath));
 
 app.get('/config', (req, res) => res.sendFile(join(__dirname, '../config.json')));
 
+app.get('/imgproxy/:date/:id', (req, res) => {
+	const { date: dateUnderscore, id } = req.params;
+	const date = dateUnderscore.replace(/_/g, '/');
+
+	axios({
+		url: `https://i.pximg.net/img-master/img/${date}/${id}_p0_master1200.jpg`,
+		method: 'get',
+		responseType: 'stream',
+		headers: {
+			Referer: 'https://www.pixiv.net',
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/103.0',
+			Cookie: `PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
+		}
+	}).then(({ data: stream }) => {
+		res.writeHead(200);
+		stream.pipe(res);
+	});
+});
+
 app.get('/relevant/:postId', async (req, res) => {
 	const { postId } = req.params;
 	const relevantPosts = await axios({
@@ -45,6 +64,7 @@ app.get('/relevant/:postId', async (req, res) => {
 
 	res.json(
 		relevantPosts.data.body.illusts
+			.filter(post => post.illustType === 0)
 			.filter(post => (post.isAdContainer ? null : post))
 			.filter(post => post)
 			.map(post => ({

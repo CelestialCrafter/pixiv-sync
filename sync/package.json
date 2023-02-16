@@ -1,11 +1,7 @@
 {
-	"name": "pixiv-sync",
+	"name": "sync",
 	"version": "1.0.0",
-	"description": "Sync your pictures with your Pixiv account, along with an improved image viewer",
 	"main": "src/app.js",
-	"repository": "https://github.com/CelestialCrafter/pixiv-sync.git",
-	"author": "CelestialCrafter <celestialcraftermc@gmail.com>",
-	"license": "MIT",
 	"scripts": {
 		"sync": "set RUN_SYNC_IMMEDIATELY=true && node src/sync/sync.js",
 		"start": "node ."

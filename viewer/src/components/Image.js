@@ -42,6 +42,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 
 	const date = post.updateDate.replace(/-/g, '/').replace(/T/g, '/').replace(/:/g, '/').replace(/\+.+/, '');
 	const url = `https://i.pximg.net/img-master/img/${date}/${post.id}_p0_master1200.jpg`;
+	// const url = `http://localhost/imgproxy/${date.replace(/\//g, '_')}/${post.id}`;
 
 	let { width, height } = calculateNewDimensions(postSize.width, postSize.height, imageWidth);
 

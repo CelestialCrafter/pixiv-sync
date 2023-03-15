@@ -1,6 +1,9 @@
 const { createWriteStream, readdirSync } = require('fs');
 const { join } = require('path');
 const axios = require('axios');
+const axiosRetry = require('axios-retry');
+
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const downloadNewWrapper = ({
 	batchSize,
@@ -29,7 +32,8 @@ const downloadNewWrapper = ({
 			});
 			const stream = createWriteStream(join(imagesPath, `${post.id}-${i}.jpg`));
 			file.data.pipe(stream);
-			stream.on('finish', () => console.log(`Finished downloading ${post.id}-${i}`));
+			await new Promise(res => { stream.on('finish', res); });
+			console.log(`Finished downloading ${post.id}-${i}`);
 		} catch (err) {
 			console.log(`Post ${post.id}`);
 			console.error(err);

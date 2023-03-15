@@ -21,7 +21,7 @@ const tryDownloadsWrapper = config => {
 		const corrupted = await checkIntegrity();
 		if (!corrupted) return;
 
-		if (retrys < 2) tryDownloads({ setImageSizes, downloadNew, checkIntegrity }, posts, retrys + 1);
+		if (retrys < 2) tryDownloads(posts, retrys + 1);
 		else console.log(`Could not fix corruption after ${retrys + 1} download attempts`);
 	};
 

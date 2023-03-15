@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 const {
 	writeFileSync,
 	readFileSync,
@@ -28,14 +27,15 @@ const downloadIndividualWrapper = ({
 
 		// eslint-disable-next-line no-restricted-syntax
 		for (const post of posts) try {
+			/* eslint-disable no-await-in-loop */
 			// eslint-disable-next-line no-promise-executor-return
 			await new Promise(res => setInterval(res, requestCooldown));
 			const response = await axios.get(`https://www.pixiv.net/ajax/illust/${post.id}`, { headers });
+			/* eslint-enable no-await-in-loop */
 
 			likes[post.id] = response.data.body.bookmarkCount;
 
 			console.log(`Checking ${post.id} - ${i + startIndex + 1}/${postsOriginal.length}`);
-			// very confusing, blame pixiv ajax api
 			response.data.body.tags.tags.forEach(tag => {
 				const nameJp = tag.tag;
 				const nameEn = tag.translation?.en;

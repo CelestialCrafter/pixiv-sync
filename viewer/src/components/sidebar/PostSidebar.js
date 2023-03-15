@@ -13,6 +13,8 @@ const RightSidebar = () => {
 	if (post) {
 		const date = post.updateDate.replace(/-/g, '/').replace(/T/g, '/').replace(/:/g, '/').replace(/\+.+/, '');
 		const url = `https://i.pximg.net/img-master/img/${date}/${post.id}_p0_master1200.jpg`;
+		// const url = `http://localhost/imgproxy/${date.replace(/\//g, '_')}/${post.id}`;
+		const localUrl = `http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg`;
 
 		return <React.Fragment>
 			<button onClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}>Open Post</button>
@@ -30,7 +32,7 @@ const RightSidebar = () => {
 						style={{
 							width: '100%'
 						}}
-						src={post?.local ? `http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-${i}.jpg` : url}
+						src={post?.local ? localUrl : url}
 					/>
 				)}
 			</ul>

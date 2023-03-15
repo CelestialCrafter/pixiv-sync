@@ -15,8 +15,8 @@ dotenv.config();
 
 const sync = async (overrideSettings = {}) => {
 	/* eslint-disable global-require */
-	const originalConfig = require('../../config.json');
-	const config = require('../../config.json');
+	const originalConfig = require('../config.json');
+	const config = require('../config.json');
 	/* eslint-enable global-require */
 
 	Object.keys(overrideSettings).forEach(key => {

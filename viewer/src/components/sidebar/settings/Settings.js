@@ -84,11 +84,13 @@ const Settings = ({ socket }) => {
 			</div>;
 		})}
 		<br />
-		<span>{sortType} - </span><button onClick={() => {
+		<span>{sortType} - </span>
+		<button onClick={() => {
 			dispatch(nextSortState());
 			dispatch(updateCurrentPosts());
 		}}>{sortState === 0 ? 'Off' : sortState === 1 ? 'Dec' : 'Asc'}</button>
-		<button onClick={handleSubmitSettings}>Submit Settings</button><br />
+		<br />
+		<button onClick={handleSubmitSettings}>Submit Settings</button>
 	</div>;
 };
 

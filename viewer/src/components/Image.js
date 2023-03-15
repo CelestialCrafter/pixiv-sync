@@ -41,14 +41,16 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 	}
 
 	const date = post.updateDate.replace(/-/g, '/').replace(/T/g, '/').replace(/:/g, '/').replace(/\+.+/, '');
+	// Use this only when you have an extention to set the referer to pixiv.net
 	const url = `https://i.pximg.net/img-master/img/${date}/${post.id}_p0_master1200.jpg`;
 	// const url = `http://localhost/imgproxy/${date.replace(/\//g, '_')}/${post.id}`;
-
+	const localUrl = `http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg`;
 	let { width, height } = calculateNewDimensions(postSize.width, postSize.height, imageWidth);
 
+	// @TODO: add a setting to switch between id copy, url open, ect
 	return <VisibleImage
 		onClick={() => dispatch(setSelectedPost(post))}
-		onDoubleClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
+		onDoubleClick={() => false ? navigator.clipboard.writeText(post.id) : window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
 		id={post.id}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{
@@ -58,7 +60,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 			top: topPx,
 			left: i % rowSize * imageWidth
 		}}
-		src={post?.local ? `http://${process.env.REACT_APP_API_IP}/${privateEnabled ? 'private' : 'images'}/${post.id}-0.jpg` : url}
+		src={post?.local ? localUrl : url}
 		title={`${post.id} - ${enTagsString}`}
 	/>;
 };

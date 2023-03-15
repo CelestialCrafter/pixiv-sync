@@ -1,4 +1,7 @@
 const axios = require('axios');
+const axiosRetry = require('axios-retry');
+
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 	const headers = {
@@ -33,6 +36,7 @@ const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 
 		for (let i = 0; posts.length > prevPosts; i++) {
 			prevPosts = posts.length;
+
 			/* eslint-disable no-await-in-loop */
 			// eslint-disable-next-line no-promise-executor-return
 			await new Promise(res => setInterval(res, requestCooldown));

@@ -13,7 +13,7 @@ const calculateNewDimensions = (sourceWidth, sourceHeight, maxWidth) => {
 
 // @TODO add a seperate image viewer in a right sidebar for singular images, and show all of the image pages
 
-const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
+const Image = ({ i, forceLoad, setLoaded, windowWidth, setPoints, setClicked, setPost }) => {
 	const privateEnabled = useSelector(selectPrivateEnabled);
 	const posts = useSelector(selectAllCurrentPosts);
 	const dispatch = useDispatch();
@@ -26,7 +26,8 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 	if (windowWidth <= 480) rowSize = 1;
 	else if (windowWidth <= 640) rowSize = 2;
 	else if (windowWidth <= 960) rowSize = 3;
-	else rowSize = 4;
+	else if (windowWidth <= 1280) rowSize = 4;
+	else rowSize = 6;
 
 	const imageWidth = windowWidth / rowSize;
 	const originalColumn = i % rowSize;
@@ -37,6 +38,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 		if (column !== originalColumn) continue;
 
 		const newPostSize = posts[newI].sizes[0];
+		if (!newPostSize) return <React.Fragment></React.Fragment>;
 		topPx += calculateNewDimensions(newPostSize.width, newPostSize.height, imageWidth).height;
 	}
 
@@ -49,8 +51,14 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth }) => {
 
 	// @TODO: add a setting to switch between id copy, url open, ect
 	return <VisibleImage
+		onContextMenu={event => {
+			event.preventDefault();
+			setPost(post);
+			setPoints({ x: event.pageX, y: event.pageY });
+			setClicked(true);
+		}}
 		onClick={() => dispatch(setSelectedPost(post))}
-		onDoubleClick={() => false ? navigator.clipboard.writeText(post.id) : window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
+		onDoubleClick={() => window.open(`https://pixiv.net/artworks/${post.id}`, '_blank', 'noreferrer')}
 		id={post.id}
 		alt={`${post.id} - ${enTagsString}`}
 		style={{

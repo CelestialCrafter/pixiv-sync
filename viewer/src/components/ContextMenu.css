@@ -1,0 +1,15 @@
+.contextMenu {
+	position: absolute;
+	z-index: 1;
+	width: min-content;
+	background-color: #0a0a0acc;
+	border-radius: 5px;
+	padding: 5px;
+	transition: left 0.05s, top 0.05s;
+}
+
+.contextMenu button {
+	width: 13vw;
+	background-color: #1e1e1eaa;
+	color: #f5f5f5;
+}

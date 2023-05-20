@@ -1,12 +1,21 @@
 .imageList {
-	height: 70vh;
+	max-height: 70vh;
 	margin: 0;
 	overflow-y: scroll;
 	scrollbar-width: none;
-	margin-bottom: 8px;
+	margin-bottom: 2px;
 	padding: 0;
 }
 
 .imageList li {
 	margin-bottom: 4px;
+}
+
+.version {
+	margin: 1%;
+}
+
+.version input {
+	margin-left: 5px;
+	width: 38%;
 }

@@ -1,6 +1,6 @@
 .sidebarWrapper {
-	min-width: 250px;
 	height: 100vh;
+	min-width: 300px;
 	top: 0;
 	left: 0;
 	padding-top: 0;
@@ -8,6 +8,12 @@
 }
 
 .sidebar {
-	background-color: white;
 	overflow-wrap: anywhere;
+	paddingTop: 0;
+	marginBottom: 8;
+}
+
+.menuIcon {
+	border: none;
+	background-color: #00000000;
 }

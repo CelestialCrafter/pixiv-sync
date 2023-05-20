@@ -1,7 +1,7 @@
 import React, { createRef, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectSyncSettings, setSyncSettings } from '../../../slices/sync';
+import { selectSyncSettings, setSyncData, setSyncSettings } from '../../../slices/sync';
 import { selectSortType, selectSortState, nextSortState } from '../../../slices/sort';
 import { updateCurrentPosts } from '../../../slices/posts';
 
@@ -84,14 +84,16 @@ const Settings = ({ socket }) => {
 			</div>;
 		})}
 		<br />
-		<span>{sortType} - </span>
+		<span>{sortType} </span>
 		<button onClick={() => {
 			dispatch(nextSortState());
 			dispatch(updateCurrentPosts());
-		}}>{sortState === 0 ? 'Off' : sortState === 1 ? 'Dec' : 'Asc'}</button>
+		}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : 'Asc'}</button>
 		<br />
-		<button onClick={handleSubmitSettings}>Submit Settings</button>
-	</div>;
+		<button onClick={() => { handleSubmitSettings(); socket.emit('sync'); }}>Sync</button>
+		<button onClick={() => socket.emit('endSync')}>End Sync</button>
+		<button onClick={() => dispatch(setSyncData([]))}>Clear Output</button>
+	</div >;
 };
 
 export default Settings;

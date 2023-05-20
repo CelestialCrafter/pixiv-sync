@@ -36,7 +36,7 @@ const downloadNewWrapper = ({
 			console.log(`Finished downloading ${post.id}-${i}`);
 		} catch (err) {
 			console.log(`Post ${post.id}`);
-			console.error(err);
+			console.error(err.toString());
 		}
 	};
 

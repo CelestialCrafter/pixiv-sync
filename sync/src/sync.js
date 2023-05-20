@@ -51,6 +51,7 @@ const sync = async (overrideSettings = {}) => {
 	await tryDownloads(posts);
 	await downloadIndividual(posts, { headers });
 	console.log('Finished Sync');
+	process.emit('endSync');
 	process.removeAllListeners();
 };
 

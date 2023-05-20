@@ -4,7 +4,6 @@ import { selectAllCurrentPosts } from '../slices/posts';
 import { selectAllCurrentTags } from '../slices/tags';
 
 import Image from './Image';
-
 import tags from '../data/tags.json';
 
 const debounce = (fn, delay) => {
@@ -15,8 +14,9 @@ const debounce = (fn, delay) => {
 	};
 };
 
-const Images = ({ imagesRef }) => {
+const Images = ({ imagesRef, ...contextMenuProps }) => {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
 
 	useEffect(() => {
 		const listener = debounce(() => setWindowWidth(window.innerWidth), 100);
@@ -33,22 +33,19 @@ const Images = ({ imagesRef }) => {
 		tagsEn: post.tags.map(tag => tags[tag]).filter(t => t) || []
 	}));
 
-
 	const getCurrentPosts = () => {
 		let visibleI = 0;
 		return currentPosts.map((post, i) => {
 			const postTags = postsWithTags.find(p => p.id === post.id).tagsEn;
 			if (currentTags.every(tag => postTags.includes(tag))) {
 				visibleI++;
-				return <Image key={post.id} i={visibleI - 1} windowWidth={windowWidth} />;
+				return <Image key={post.id} i={visibleI - 1} windowWidth={windowWidth} {...contextMenuProps} />;
 			}
 			return false;
 		}).filter(img => img);
 	};
 
-	return <div ref={imagesRef} style={{ overflowY: 'hidden' }}>
-		{getCurrentPosts()}
-	</div>;
+	return <div ref={imagesRef} style={{ overflowY: 'hidden' }}>{getCurrentPosts()}</div>;
 };
 
 export default React.memo(Images);

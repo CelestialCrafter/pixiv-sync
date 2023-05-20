@@ -13,15 +13,28 @@ export const initialState = {
 	selectedPost: null
 };
 
-export const setRelevantPosts = createAsyncThunk('posts/setRelevantPosts', async (postId, thunkAPI) => {
+export const setPostsFromPixiv = createAsyncThunk('posts/setPostsFromPixiv', async (url, thunkAPI) => {
 	const { dispatch } = thunkAPI;
 
-	const relevantPosts = await axios({
-		url: `http://${process.env.REACT_APP_API_IP}/relevant/${postId}`,
-		method: 'get'
-	});
+	const posts = await axios({ url, method: 'get' });
 
-	dispatch(setPostsOverride(relevantPosts.data));
+	dispatch(setPostsOverride(posts.data));
+	dispatch(updateCurrentPosts());
+});
+
+export const addPostsFromPixiv = createAsyncThunk('posts/addPostsFromPixiv', async (url, thunkAPI) => {
+	const { dispatch, getState } = thunkAPI;
+
+	const posts = await axios({ url, method: 'get' });
+
+	dispatch(setPostsOverride([...getState().posts.postsOverride, ...posts.data]));
+	dispatch(updateCurrentPosts());
+});
+
+export const resetPostsOverride = createAsyncThunk('posts/resetPostsOverride', async (postId, thunkAPI) => {
+	const { dispatch } = thunkAPI;
+
+	dispatch(setPostsOverride([]));
 	dispatch(updateCurrentPosts());
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
 	selectPrivateEnabled,
@@ -19,36 +19,39 @@ const Tags = () => {
 	const [filter, setFilter] = useState('');
 	const [dropdown, setDropdown] = useState(false);
 
-	const postsWithTags = currentPosts.map(post => {
-		return {
+	const ctwp = useMemo(() => {
+		const postsWithTags = currentPosts.map(post => ({
 			id: post.id,
 			tagsEn: post.tags.map(tag => tags[tag]).filter(t => t) || []
-		};
-	});
+		}));
 
-	const ctwp = [
-		...new Set(Object.values(tags).filter(tag => postsWithTags.find(({ tagsEn }) => tagsEn.includes(tag))))
-	];
+		return [
+			...new Set(Object.values(tags).filter(tag => postsWithTags.find(({ tagsEn }) => tagsEn.includes(tag))))
+		];
+	}, [currentPosts]);
 
 	return (
 		<React.Fragment>
-			<button onClick={() => setDropdown(!dropdown)}>TOGGLE</button>
+			<button
+				style={{ backgroundColor: privateEnabled ? 'red' : 'inherit' }}
+				onClick={() => {
+					dispatch(togglePrivateEnabled());
+					dispatch(updateCurrentPosts());
+				}}
+			>Private</button>
+			<button
+				style={{ backgroundColor: dropdown ? 'red' : 'inherit' }}
+				onClick={() => setDropdown(prevDropdown => !prevDropdown)}
+			>Toggle Tags</button>
 
-			{dropdown ? <div style={{ marginTop: 8 }}>
+			<div style={{ display: dropdown ? 'initial' : 'none' }}>
 				<button
-					style={{ backgroundColor: 'red' }}
+					style={{ backgroundColor: '#fa0000' }}
 					onClick={() => {
 						dispatch(setCurrentTags([]));
 						dispatch(updateCurrentPosts());
 					}}
-				>RESET</button>
-				<button
-					style={{ backgroundColor: privateEnabled ? 'red' : 'inherit' }}
-					onClick={() => {
-						dispatch(togglePrivateEnabled());
-						dispatch(updateCurrentPosts());
-					}}
-				>PRIVATE</button>
+				>Reset</button>
 
 				<input type="text" value={filter} onChange={e => setFilter(e.target.value)} />
 				<div style={{
@@ -68,7 +71,7 @@ const Tags = () => {
 						return <React.Fragment></React.Fragment>;
 					})}
 				</div>
-			</div> : <React.Fragment></React.Fragment>}
+			</div>
 		</React.Fragment>
 	);
 };

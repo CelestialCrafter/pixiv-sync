@@ -11,15 +11,16 @@ const Sidebar = props => {
 	const padding = sidebar === 'right' ? 0 : 4;
 
 	return <div className="sidebarWrapper" style={{
-		width: hidden ? 0 : sidebar === 'right' ? '20%' : '15%',
+		width: hidden ? 0 : '18%',
 		height: hidden ? 0 : null,
-		backgroundColor: hidden ? 'inherit' : 'white'
+		backgroundColor: hidden ? 'inherit' : '#0a0a0acc'
 	}}>
 		<button
+			className="menuIcon"
 			onClick={() => setHidden(prevHidden => !prevHidden)}
-			style={{ border: 'none' }}
 		><i className="material-icons">menu</i></button>
 		<button
+			className="menuIcon"
 			style={{
 				display: hidden ? 'none' : 'unset',
 				border: 'none'
@@ -31,9 +32,7 @@ const Sidebar = props => {
 			display: hidden ? 'none' : 'block',
 			paddingLeft: padding,
 			paddingRight: padding,
-			paddingBottom: padding,
-			paddingTop: 0,
-			marginBottom: 8,
+			paddingBottom: padding
 		}}>
 			{sidebar === 'left' ? <LeftSidebar {...props} /> : <PostSidebar {...props} />}
 		</div>

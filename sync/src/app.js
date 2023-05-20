@@ -55,18 +55,14 @@ app.get('/imgproxy/:date/:id', async (req, res) => {
 	stream.pipe(res);
 });
 
-app.get('/relevant/:postId', async (req, res) => {
-	const { postId } = req.params;
-	const relevantPosts = await axios({
-		url: `https://www.pixiv.net/ajax/illust/${postId}/recommend/init?limit=180&lang=en`,
+const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => {
+	const posts = await axios({
+		url: pixivUrl,
 		method: 'get',
 		headers: authHeaders
 	}).catch();
 
-	const formattedRelevantPosts = relevantPosts.data.body.illusts
-		.filter(post => post.illustType === 0)
-		.filter(post => (post.isAdContainer ? null : post))
-		.filter(post => post)
+	const formattedPosts = processing(posts.data.body)
 		.map(post => ({
 			id: post.id,
 			url: post.url,
@@ -76,7 +72,88 @@ app.get('/relevant/:postId', async (req, res) => {
 			sizes: [{ width: post.width, height: post.height }]
 		}));
 
-	res.json(formattedRelevantPosts);
+	res.json(formattedPosts);
+};
+
+app.get('/like/:id', async (req, res) => {
+	const { id } = req.params;
+	const { priv, r18 } = req.query;
+
+	try {
+		const { data } = await axios({
+			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/add',
+			method: 'post',
+			data: {
+				illust_id: id,
+				restrict: Number(priv === 'true'),
+				tags: r18 === 'true' ? ['R-18'] : [],
+				comment: ''
+			},
+			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
+		});
+
+		res.json(data);
+	} catch (err) {
+		res.json(err.response.data);
+	}
+});
+
+app.get('/unlike/:id', async (req, res) => {
+	const { id } = req.params;
+
+	try {
+		const { data } = await axios({
+			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
+			method: 'post',
+			data: `bookmark_id=${id}`,
+			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
+		});
+
+		res.json(data);
+	} catch (err) {
+		res.json(err.response.data);
+	}
+});
+
+app.get('/relevant/:id', async (req, res) => {
+	const { id } = req.params;
+
+	getFromPixiv(req, res, `https://www.pixiv.net/ajax/illust/${id}/recommend/init?limit=180&lang=en`, posts =>
+		posts.illusts
+			.filter(post => post.illustType === 0)
+			.filter(post => (post.isAdContainer ? null : post)));
+});
+
+app.get('/browse/:version', async (req, res) => {
+	const { version } = req.params;
+
+	getFromPixiv(
+		req,
+		res,
+		`https://www.pixiv.net/ajax/discovery/artworks?mode=all&limit=100&lang=en${version ? `&version=${version}` : ''}`,
+		posts => posts.thumbnails.illust.filter(post => post.illustType === 0)
+	);
+});
+
+app.get('/following/:page', async (req, res) => {
+	const { page } = req.params;
+
+	getFromPixiv(req, res, `https://www.pixiv.net/ajax/follow_latest/illust?p=${page}&mode=all&lang=en`, posts =>
+		posts.thumbnails.illust
+			.filter(post => post.illustType === 0));
+});
+
+app.get('/unlike/:id', async (req, res) => {
+	const { id } = req.params;
+
+	const { data: unlike } = await axios({
+		url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
+		method: 'post',
+		headers: authHeaders,
+		data: `bookmark_id=${id}`
+	}).catch(err => res.json(err.data));
+
+	res.json(unlike);
 });
 
 const debounce = (fn, delay) => {

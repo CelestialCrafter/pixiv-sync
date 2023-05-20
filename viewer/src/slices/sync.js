@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
-export const fetchSettings = createAsyncThunk('sync/fetchSettings', async () => (await axios(`http://${process.env.REACT_APP_API_IP}/config`)).data);
+export const fetchSettings = createAsyncThunk('sync/fetchSettings', async (_arg, { dispatch }) => {
+	const settings = await (await fetch(`http://${process.env.REACT_APP_API_IP}/config`)).json();
+
+	return settings;
+});
 
 export const syncSlice = createSlice({
 	name: 'sync',

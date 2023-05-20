@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import './Sidebar.css';
-import LeftSidebar from './SettingsSidebar';
+import SettingsSidebar from './SettingsSidebar';
 import PostSidebar from './PostSidebar';
 
 const Sidebar = props => {
@@ -34,7 +34,7 @@ const Sidebar = props => {
 			paddingRight: padding,
 			paddingBottom: padding
 		}}>
-			{sidebar === 'left' ? <LeftSidebar {...props} /> : <PostSidebar {...props} />}
+			{sidebar === 'left' ? <SettingsSidebar {...props} /> : <PostSidebar {...props} />}
 		</div>
 	</div>;
 };

@@ -6,7 +6,6 @@ const express = require('express');
 const { join } = require('path');
 const axios = require('axios');
 const cors = require('cors');
-const url = require('url');
 
 const { pictureDirectory, userId } = require('../config.json');
 
@@ -19,7 +18,8 @@ const io = ioWrapper(server);
 const devURI = 'localhost:3000';
 
 const devProxy = proxy(devURI, {
-	proxyReqPathResolver: req => url.parse(req.originalUrl).path
+	// eslint-disable-next-line global-require
+	proxyReqPathResolver: req => require('url').parse(req.originalUrl).path
 });
 
 const authHeaders = {
@@ -37,17 +37,17 @@ app.use('/private', express.static(privatePath));
 
 app.get('/config', (req, res) => res.sendFile(join(__dirname, '../config.json')));
 
-app.get('/imgproxy/:date/:id', async (req, res) => {
-	const { date: dateUnderscore, id } = req.params;
+app.get('/imgproxy/:id/', async (req, res) => {
+	const { date: dateUnderscore, page } = req.query;
+	const { id, url } = req.params;
 	const date = dateUnderscore.replace(/_/g, '/');
 
-	const stream = await axios({
-		url: `https://i.pximg.net/img-master/img/${date}/${id}_p0_master1200.jpg`,
+	const { data: stream } = await axios({
+		url: decodeURIComponent(url) || `https://i.pximg.net/img-master/img/${date}/${id}_p${page || 0}_master1200.jpg`,
 		method: 'get',
 		responseType: 'stream',
 		headers: {
-			Referer: 'https://www.pixiv.net',
-			...authHeaders
+			Referer: 'https://www.pixiv.net'
 		}
 	});
 
@@ -55,24 +55,44 @@ app.get('/imgproxy/:date/:id', async (req, res) => {
 	stream.pipe(res);
 });
 
-const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => {
-	const posts = await axios({
-		url: pixivUrl,
+app.get('/pages/:id', async (req, res) => {
+	const { id } = req.params;
+
+	const pages = await axios({
+		url: `https://www.pixiv.net/ajax/illust/${id}/pages`,
 		method: 'get',
 		headers: authHeaders
-	}).catch();
+	});
 
-	const formattedPosts = processing(posts.data.body)
-		.map(post => ({
-			id: post.id,
-			url: post.url,
-			updateDate: post.updateDate,
-			pageCount: 1,
-			tags: post.tags,
-			sizes: [{ width: post.width, height: post.height }]
-		}));
+	res.json(pages.data.body.map(page => ({
+		url: page.urls.original,
+		width: page.width,
+		height: page.height
+	})));
+});
 
-	res.json(formattedPosts);
+const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => {
+	try {
+		const posts = await axios({
+			url: pixivUrl,
+			method: 'get',
+			headers: { ...authHeaders }
+		});
+
+		const formattedPosts = processing(posts.data.body)
+			.map(post => ({
+				id: post.id,
+				url: post.url,
+				updateDate: post.updateDate,
+				pageCount: 1,
+				tags: post.tags,
+				sizes: [{ width: post.width, height: post.height }]
+			}));
+
+		res.json(formattedPosts);
+	} catch (err) {
+		res.status(500).json(err?.response?.data || err);
+	}
 };
 
 app.get('/like/:id', async (req, res) => {
@@ -94,7 +114,7 @@ app.get('/like/:id', async (req, res) => {
 
 		res.json(data);
 	} catch (err) {
-		res.json(err.response.data);
+		res.status(500).json(err?.response?.data || err);
 	}
 });
 
@@ -102,26 +122,42 @@ app.get('/unlike/:id', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const { data } = await axios({
+		const { data: postData } = await axios({
+			url: `https://www.pixiv.net/ajax/illust/${id}`,
+			method: 'get',
+			headers: { ...authHeaders }
+		});
+
+		const bookmarkId = postData.body.bookmarkData?.id;
+
+		if (!bookmarkId) return res.status(404).json({ error: true, message: 'Bookmark data does not exist.', body: [] });
+
+		const { data: deleteData } = await axios({
 			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
 			method: 'post',
-			data: `bookmark_id=${id}`,
+			data: `bookmark_id=${bookmarkId}`,
 			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
 		});
 
-		res.json(data);
+		res.json(deleteData);
 	} catch (err) {
-		res.json(err.response.data);
+		res.status(500).json(err?.response?.data || err);
 	}
 });
 
-app.get('/relevant/:id', async (req, res) => {
-	const { id } = req.params;
+app.get('/relevant/:id/:version?', async (req, res) => {
+	const { id, version } = req.params;
 
-	getFromPixiv(req, res, `https://www.pixiv.net/ajax/illust/${id}/recommend/init?limit=180&lang=en`, posts =>
+	getFromPixiv(req, res, `https://www.pixiv.net/ajax/illust/${id}/recommend/init?limit=180&lang=en${version ? `&version=${version}` : ''}`, posts =>
 		posts.illusts
 			.filter(post => post.illustType === 0)
-			.filter(post => (post.isAdContainer ? null : post)));
+			.filter(post => (post.isAdContainer ? null : post))
+			.sort((a, b) => {
+				const scoreA = posts.recommendedIllusts[a.id];
+				const scoreB = posts.recommendedIllusts[b.id];
+
+				return scoreA - scoreB;
+			}));
 });
 
 app.get('/browse/:version', async (req, res) => {
@@ -143,17 +179,22 @@ app.get('/following/:page', async (req, res) => {
 			.filter(post => post.illustType === 0));
 });
 
-app.get('/unlike/:id', async (req, res) => {
+app.get('/user/:id', async (req, res) => {
 	const { id } = req.params;
 
-	const { data: unlike } = await axios({
-		url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
-		method: 'post',
-		headers: authHeaders,
-		data: `bookmark_id=${id}`
-	}).catch(err => res.json(err.data));
+	const postIds = await axios({
+		url: `https://www.pixiv.net/ajax/user/${id}/profile/all?lang=en`,
+		method: 'get',
+		headers: authHeaders
+	});
 
-	res.json(unlike);
+	const urlMappedIllusts = Object.keys(postIds.data.body.illusts).reverse().slice(0, 100).map(postId => `ids[]=${postId}`);
+	getFromPixiv(
+		req,
+		res,
+		`https://www.pixiv.net/ajax/user/${id}/profile/illusts?${urlMappedIllusts.join('&')}&work_category=illustManga&is_first_page=1`,
+		(posts) => Object.values(posts.works).filter(post => post.illustType === 0).reverse()
+	);
 });
 
 const debounce = (fn, delay) => {
@@ -222,8 +263,8 @@ io.on('connection', socket => {
 		child.stderr.on('data', chunk => chunk.toString().split('\n').slice(0, -1).forEach(emitData));
 
 		child.on('close', () => {
-			child.stdout.removeAllListeners();
-			child.stderr.removeAllListeners();
+			child?.stdout.removeAllListeners();
+			child?.stderr.removeAllListeners();
 			child = null;
 		});
 

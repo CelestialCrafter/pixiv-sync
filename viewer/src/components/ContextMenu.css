@@ -13,3 +13,45 @@
 	background-color: #1e1e1eaa;
 	color: #f5f5f5;
 }
+
+@keyframes like {
+	0% {
+		transform: translateY(0%);
+		opacity: 1;
+	}
+
+	50% {
+		transform: translateY(-170% / 1.5);
+		opacity: 0.7;
+	}
+
+	100% {
+		transform: translateY(-170%);
+		opacity: 0;
+	}
+}
+
+@keyframes unlike {
+	0% {
+		transform: translateY(0%);
+		opacity: 1;
+	}
+
+	50% {
+		transform: translateY(170% / 1.5);
+		opacity: 0.7;
+	}
+
+	100% {
+		transform: translateY(170%);
+		opacity: 0;
+	}
+}
+
+.like {
+	pointer-events: none;
+	position: absolute;
+	z-index: 2;
+	width: 64px;
+	height: auto;
+}

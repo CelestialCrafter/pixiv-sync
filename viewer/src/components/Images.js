@@ -17,7 +17,6 @@ const debounce = (fn, delay) => {
 const Images = ({ imagesRef, ...contextMenuProps }) => {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-
 	useEffect(() => {
 		const listener = debounce(() => setWindowWidth(window.innerWidth), 100);
 
@@ -34,12 +33,16 @@ const Images = ({ imagesRef, ...contextMenuProps }) => {
 	}));
 
 	const getCurrentPosts = () => {
-		let visibleI = 0;
 		return currentPosts.map((post, i) => {
 			const postTags = postsWithTags.find(p => p.id === post.id).tagsEn;
 			if (currentTags.every(tag => postTags.includes(tag))) {
-				visibleI++;
-				return <Image key={post.id} i={visibleI - 1} windowWidth={windowWidth} {...contextMenuProps} />;
+				return <Image
+					usePositionModifications
+					key={`${post.id}-${Date.now() + (Math.random() * 10000)}`}
+					i={i}
+					windowWidth={windowWidth}
+					{...contextMenuProps}
+				/>;
 			}
 			return false;
 		}).filter(img => img);

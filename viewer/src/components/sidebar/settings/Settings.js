@@ -83,17 +83,18 @@ const Settings = ({ socket }) => {
 				/>
 			</div>;
 		})}
-		<br />
-		<span>{sortType} </span>
-		<button onClick={() => {
-			dispatch(nextSortState());
-			dispatch(updateCurrentPosts());
-		}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : 'Asc'}</button>
+		<div>
+			<span>{sortType} </span>
+			<button onClick={() => {
+				dispatch(nextSortState());
+				dispatch(updateCurrentPosts());
+			}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : 'Asc'}</button>
+		</div>
 		<br />
 		<button onClick={() => { handleSubmitSettings(); socket.emit('sync'); }}>Sync</button>
 		<button onClick={() => socket.emit('endSync')}>End Sync</button>
 		<button onClick={() => dispatch(setSyncData([]))}>Clear Output</button>
-	</div >;
+	</div>;
 };
 
 export default Settings;

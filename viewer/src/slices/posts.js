@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
 import likes from '../data/likes.json';
 import posts from '../data/posts.json';
@@ -10,30 +9,25 @@ export const initialState = {
 	currentPosts: [],
 	postsOverride: [],
 	privateEnabled: false,
-	selectedPost: null
+	selectedPost: null,
+	refererEnabled: false
 };
 
-export const setPostsFromPixiv = createAsyncThunk('posts/setPostsFromPixiv', async (url, thunkAPI) => {
-	const { dispatch } = thunkAPI;
+export const setPostsFromPixiv = createAsyncThunk('posts/setPostsFromPixiv', async (url, { dispatch }) => {
+	const posts = await (await fetch(url)).json();
 
-	const posts = await axios({ url, method: 'get' });
-
-	dispatch(setPostsOverride(posts.data));
+	dispatch(setPostsOverride(posts));
 	dispatch(updateCurrentPosts());
 });
 
-export const addPostsFromPixiv = createAsyncThunk('posts/addPostsFromPixiv', async (url, thunkAPI) => {
-	const { dispatch, getState } = thunkAPI;
+export const addPostsFromPixiv = createAsyncThunk('posts/addPostsFromPixiv', async (url, { dispatch, getState }) => {
+	const posts = await (await fetch(url)).json();
 
-	const posts = await axios({ url, method: 'get' });
-
-	dispatch(setPostsOverride([...getState().posts.postsOverride, ...posts.data]));
+	dispatch(setPostsOverride([...getState().posts.postsOverride, ...posts]));
 	dispatch(updateCurrentPosts());
 });
 
-export const resetPostsOverride = createAsyncThunk('posts/resetPostsOverride', async (postId, thunkAPI) => {
-	const { dispatch } = thunkAPI;
-
+export const resetPostsOverride = createAsyncThunk('posts/resetPostsOverride', async (postId, { dispatch }) => {
 	dispatch(setPostsOverride([]));
 	dispatch(updateCurrentPosts());
 });
@@ -47,6 +41,8 @@ export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', a
 	if (state.posts.postsOverride[0]) usedPosts = state.posts.postsOverride;
 	else if (state.posts.privateEnabled) usedPosts = privatePosts.map(post => ({ ...post, local: true }));
 	else usedPosts = posts.map(post => ({ ...post, local: true }));
+
+	usedPosts = usedPosts.filter((value, index, self) => index === self.findIndex(t => t.id === value.id));
 
 	const postsWithTags = usedPosts.map(post => ({
 		id: post.id,
@@ -90,6 +86,7 @@ export const postsSlice = createSlice({
 		togglePrivateEnabled: state => { state.privateEnabled = !state.privateEnabled; },
 		setSelectedPost: (state, action) => { state.selectedPost = action.payload; },
 		deleteSelectedPost: state => { state.selectedPost = null; },
+		setRefererEnabled: (state, action) => { state.refererEnabled = action.payload; },
 	},
 	extraReducers: builder => builder.addCase(updateCurrentPosts.fulfilled, (state, action) => { state.currentPosts = action.payload; })
 });
@@ -97,6 +94,7 @@ export const postsSlice = createSlice({
 export const selectSelectedPost = state => state.posts.selectedPost;
 export const selectPrivateEnabled = state => state.posts.privateEnabled;
 export const selectAllCurrentPosts = state => state.posts.currentPosts;
+export const selectRefererEnabled = state => state.posts.refererEnabled;
 
-export const { setPostsOverride, setPrivateEnabled, togglePrivateEnabled, setSelectedPost, deleteSelectedPost } = postsSlice.actions;
+export const { setPostsOverride, setPrivateEnabled, togglePrivateEnabled, setSelectedPost, deleteSelectedPost, setRefererEnabled } = postsSlice.actions;
 export default postsSlice.reducer;

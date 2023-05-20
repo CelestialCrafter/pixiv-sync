@@ -47,7 +47,7 @@ const downloadNewWrapper = ({
 
 			// Create all download functions
 			const postRequests = [];
-			let batch = 0;
+			let batchNum = 0;
 
 			// eslint-disable-next-line no-restricted-syntax
 			for (const post of newPosts) postRequests.push(
@@ -62,14 +62,15 @@ const downloadNewWrapper = ({
 				splitPostRequests.push(batchArray.flat());
 			}
 
-			await Promise.all(splitPostRequests.map(async requestFunctions => {
-				const promises = await Promise.all(requestFunctions.map(f => f()));
-				console.log(`Finished batch ${batch}`);
-				batch++;
-				// eslint-disable-next-line no-promise-executor-return
-				await new Promise(res => setTimeout(res, requestCooldown));
-				return promises;
-			}));
+			/* eslint-disable no-await-in-loop */
+			// eslint-disable-next-line no-restricted-syntax
+			for (const requestFunctions of splitPostRequests) {
+				await Promise.all(requestFunctions.map(f => f()));
+				console.log(`Finished batch ${batchNum}`);
+				batchNum++;
+				await new Promise(res => { setTimeout(res, requestCooldown); });
+			}
+			/* eslint-enable no-await-in-loop */
 		} else console.log('No new posts to download');
 	};
 

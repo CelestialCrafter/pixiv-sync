@@ -46,7 +46,7 @@ const downloadIndividualWrapper = ({
 				}
 			});
 
-			if (i % 10 === 0) {
+			if (i % 20 === 0) {
 				console.log('Saved tags!');
 				writeFileSync(tagCachePath, JSON.stringify(tags));
 				writeFileSync(likeCachePath, JSON.stringify(likes));

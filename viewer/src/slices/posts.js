@@ -5,6 +5,19 @@ import posts from '../data/posts.json';
 import privatePosts from '../data/privatePosts.json';
 import tags from '../data/tags.json';
 
+const shuffle = array => {
+	let currentIndex = array.length, randomIndex;
+
+	while (currentIndex !== 0) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		[array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+	}
+
+	return array;
+};
+
 export const initialState = {
 	currentPosts: [],
 	postsOverride: [],
@@ -63,16 +76,14 @@ export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', a
 		if (!aValue) return 1;
 		if (!bValue) return -1;
 		return aValue > bValue ? -1 : 1;
-	});
-
-	if (state.sort.state === 2) newPosts.sort((a, b) => {
+	}); else if (state.sort.state === 2) newPosts.sort((a, b) => {
 		const aValue = sortValue[Number(a.id)];
 		const bValue = sortValue[Number(b.id)];
 
 		if (!aValue) return 1;
 		if (!bValue) return -1;
 		return aValue > bValue ? 1 : -1;
-	});
+	}); else if (state.sort.state === 3) newPosts = shuffle(newPosts);
 
 	return newPosts;
 });

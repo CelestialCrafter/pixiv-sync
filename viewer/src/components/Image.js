@@ -21,7 +21,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth, setPoints, setClicked, se
 	const dispatch = useDispatch();
 
 	const post = posts[i];
-	const postSize = post.sizes[0];
+	const postSize = post.sizes ? post.sizes[0] : { width: 1920, height: 1080 };
 	const enTagsString = post.tags.map(tag => tags[tag]).filter(t => t).join(', ');
 
 	let rowSize;
@@ -40,7 +40,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth, setPoints, setClicked, se
 		const column = newI % rowSize;
 		if (column !== originalColumn) continue;
 
-		const newPostSize = posts[newI].sizes[0];
+		const newPostSize = posts[newI].sizes ? posts[newI].sizes[0] : { width: 1920, height: 1080 };
 		if (!newPostSize) return <React.Fragment></React.Fragment>;
 		top += calculateNewDimensions(newPostSize.width, newPostSize.height, imageWidth).height;
 	}

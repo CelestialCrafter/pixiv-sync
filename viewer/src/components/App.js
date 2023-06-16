@@ -16,6 +16,8 @@ const socket = io(`ws://${process.env.REACT_APP_API_IP}`);
 // @TODO add image full view
 // @TODO add image details in PostSidebar
 // @TODO add fanbox/patreon scraper, then use kemono.party to add a viewer
+// @TODO change the settings menu to a modal (maybe), and let the user choose: brightness, set images per line, browse age restriction mode (all, r18, safe)
+// @TODO add a loading indicator while loading the extra post pages
 
 const App = () => {
 	const dispatch = useDispatch();

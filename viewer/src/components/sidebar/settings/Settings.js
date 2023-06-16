@@ -88,7 +88,8 @@ const Settings = ({ socket }) => {
 			<button onClick={() => {
 				dispatch(nextSortState());
 				dispatch(updateCurrentPosts());
-			}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : 'Asc'}</button>
+				/* @TODO make this not reliant on terinaries so i can expand it more */
+			}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : sortState === 2 ? 'Asc' : 'Random'}</button>
 		</div>
 		<br />
 		<button onClick={() => { handleSubmitSettings(); socket.emit('sync'); }}>Sync</button>

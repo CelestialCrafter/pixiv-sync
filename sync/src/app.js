@@ -153,8 +153,8 @@ app.get('/relevant/:id/:version?', async (req, res) => {
 			.filter(post => post.illustType === 0)
 			.filter(post => (post.isAdContainer ? null : post))
 			.sort((a, b) => {
-				const scoreA = posts.recommendedIllusts[a.id];
-				const scoreB = posts.recommendedIllusts[b.id];
+				const scoreA = posts.details[a.id].score;
+				const scoreB = posts.details[b.id].score;
 
 				return scoreA - scoreB;
 			}));

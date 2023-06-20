@@ -22,14 +22,14 @@ Sync your pictures with your Pixiv account, along with an improved image viewer.
 
 ## Setup
 NPM will be used as the package manager, adapt the commands for your package manager if you use something else.
-- Run `npm i`
-- `cd` into `src/viewer` and run `npm i`manager
+- `cd` into `viewer` and run `npm i`
+- `cd` into `sync` and run `npm i`
 - Create `config.json`\
 Use `config.example.json` as a base and fill out `userId` and `pictureDirectory`. Change any other configs if you want
 - Create `.env`\
 Use .example.env as a base and fill out `PIXIV_TOKEN`
-- If you want to build the website: Build it and run `npm run start`
-- Else if you want to run in dev mode, `cd` into src/viewer and run `npm run start`, then in another terminal run `npm run start`
+- If you want to build the website: `cd` into `viewer` and run `npm run build` then `cd` into `sync` and run `npm run start`
+- Else if you want to run in dev mode, `cd` into viewer and run `npm run start`, then in another terminal `cd` into `sync` and run `npm run start`
 
 ### How to get your `userId`
 Go to [Pixiv](https://pixiv.net) and click your profile button\

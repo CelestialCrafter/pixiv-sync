@@ -12,11 +12,11 @@ import { fetchSettings } from '../slices/sync';
 import { updateCurrentPosts, setRefererEnabled } from '../slices/posts';
 
 /* SORTED (roughly) BY PRIORITY */
-// @TODO use issues instead of a bunch of todo's....
 // @TODO add image full view
 // @TODO add image details in PostSidebar
 // @TODO change the settings menu to a modal (maybe), and let the user choose: brightness, set images per line, browse age restriction mode (all, r18, safe (app.js:169:55))
 // @TODO add a loading indicator while loading the extra post pages
+// @TODO use issues instead of a bunch of todo's....
 // @TODO add the ability to set a custom post into the PostSidebar
 // @TODO maybe create a new like button from template on like instead of showing it and playing an animation, so whenever you move the ctx menu the like button doesnt move
 // @TODO styling overhaul (if needed)

@@ -67,7 +67,7 @@ const ContextMenu = ({ children }) => {
 			<button onClick={({ button }) => runAction(button, generateUrl(true, true), 'like')}>Like: Private</button>
 			<button onClick={({ button }) => runAction(button, generateUrl(true, true, true), 'like')}>Like: Private R-18</button>
 			<button onClick={({ button }) => runAction(button, generateUrl(false), 'unlike')}>Unlike</button>
-			<button onClick={({ button }) => button === 0 ? navigator.clipboard.writeText(post.id) : 0}>Copy ID</button>
+			<button onClick={({ button }) => button === 0 ? navigator.clipboard.writeText(`https://pixiv.net/artworks/${post.id}`) : 0}>Copy Link</button>
 		</div> : null}
 		{renderChildren()}
 	</React.Fragment>;

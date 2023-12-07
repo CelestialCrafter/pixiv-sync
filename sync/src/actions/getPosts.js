@@ -1,12 +1,7 @@
-const axios = require('axios');
-const axiosRetry = require('axios-retry');
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
-
 const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/103.0',
-		Cookie: `PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
+		Cookie: //`PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
 	};
 
 	const generateURL = (offset = 0) =>
@@ -24,10 +19,10 @@ const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 			tags: post.tags
 		});
 
-		const initialResponse = await axios.get(generateURL(), { headers }).catch(err => { throw new Error(err.toString()); });
+		const initialResponse = await (await fetch(generateURL(), { headers })).json();
 
-		likes = initialResponse.data.body.total;
-		posts = posts.concat(initialResponse.data.body.works)
+		likes = initialResponse.body.total;
+		posts = posts.concat(initialResponse.body.works)
 			.filter(post => post.illustType === 0)
 			.map(postFormat);
 		console.log(`${Math.min(posts.length, likes)}/${likes}`);
@@ -40,10 +35,10 @@ const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 			/* eslint-disable no-await-in-loop */
 			// eslint-disable-next-line no-promise-executor-return
 			await new Promise(res => setInterval(res, requestCooldown));
-			const response = await axios.get(generateURL(i * maxLikesPerRequest), { headers });
+			const response = await (await fetch(generateURL(i * maxLikesPerRequest), { headers })).json();
 			/* eslint-enable no-await-in-loop */
 
-			const newPosts = response.data.body.works
+			const newPosts = response.body.works
 				.filter(post => post.illustType === 0)
 				.map(postFormat);
 			posts = posts.concat(newPosts);

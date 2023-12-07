@@ -4,7 +4,6 @@ const {
 	existsSync
 } = require('fs');
 const { join } = require('path');
-const axios = require('axios');
 
 const downloadIndividualWrapper = ({
 	startIndividualFrom,
@@ -30,7 +29,7 @@ const downloadIndividualWrapper = ({
 			/* eslint-disable no-await-in-loop */
 			// eslint-disable-next-line no-promise-executor-return
 			await new Promise(res => setInterval(res, requestCooldown));
-			const response = await axios.get(`https://www.pixiv.net/ajax/illust/${post.id}`, { headers });
+			const response = await (await fetch(`https://www.pixiv.net/ajax/illust/${post.id}`, { headers })).json();
 			/* eslint-enable no-await-in-loop */
 
 			likes[post.id] = response.data.body.bookmarkCount;

@@ -1,9 +1,5 @@
 const { createWriteStream, readdirSync } = require('fs');
 const { join } = require('path');
-const axios = require('axios');
-const axiosRetry = require('axios-retry');
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const downloadNewWrapper = ({
 	batchSize,
@@ -22,16 +18,15 @@ const downloadNewWrapper = ({
 
 	const createDownloadRequest = (url, i, post, headers) => async () => {
 		try {
-			const file = await axios.get(url, {
+			const { body: file } = await fetch(url, {
 				headers: {
 					Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
 					Referer: 'https://www.pixiv.net/',
 					'User-Agent': headers['User-Agent']
-				},
-				responseType: 'stream'
+				}
 			});
 			const stream = createWriteStream(join(imagesPath, `${post.id}-${i}.jpg`));
-			file.data.pipe(stream);
+			file.pipe(stream);
 			await new Promise(res => { stream.on('finish', res); });
 			console.log(`Finished downloading ${post.id}-${i}`);
 		} catch (err) {

@@ -4,7 +4,6 @@ const { createServer } = require('http');
 const ioWrapper = require('socket.io');
 const express = require('express');
 const { join } = require('path');
-const axios = require('axios');
 const cors = require('cors');
 
 const { pictureDirectory, userId } = require('../config.json');
@@ -15,7 +14,7 @@ const app = express();
 const server = createServer(app);
 const io = ioWrapper(server);
 
-const devURI = 'localhost:3000';
+const devURI = 'http://127.0.0.1:3000';
 
 const devProxy = proxy(devURI, {
 	// eslint-disable-next-line global-require
@@ -42,10 +41,8 @@ app.get('/imgproxy/:id/', async (req, res) => {
 	const { id, url } = req.params;
 	const date = dateUnderscore.replace(/_/g, '/');
 
-	const { data: stream } = await axios({
+	const { body: stream } = await fetch({
 		url: decodeURIComponent(url) || `https://i.pximg.net/img-master/img/${date}/${id}_p${page || 0}_master1200.jpg`,
-		method: 'get',
-		responseType: 'stream',
 		headers: {
 			Referer: 'https://www.pixiv.net'
 		}
@@ -58,11 +55,10 @@ app.get('/imgproxy/:id/', async (req, res) => {
 app.get('/pages/:id', async (req, res) => {
 	const { id } = req.params;
 
-	const pages = await axios({
+	const pages = await (await fetch({
 		url: `https://www.pixiv.net/ajax/illust/${id}/pages`,
-		method: 'get',
 		headers: authHeaders
-	});
+	})).json();
 
 	res.json(pages.data.body.map(page => ({
 		url: page.urls.original,
@@ -73,11 +69,10 @@ app.get('/pages/:id', async (req, res) => {
 
 const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => {
 	try {
-		const posts = await axios({
+		const posts = await (await fetch({
 			url: pixivUrl,
-			method: 'get',
-			headers: { ...authHeaders }
-		});
+			headers: authHeaders
+		})).json();
 
 		const formattedPosts = processing(posts.data.body)
 			.map(post => ({
@@ -100,7 +95,7 @@ app.get('/like/:id', async (req, res) => {
 	const { priv, r18 } = req.query;
 
 	try {
-		const { data } = await axios({
+		const { data } = await (await fetch({
 			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/add',
 			method: 'post',
 			data: {
@@ -110,7 +105,7 @@ app.get('/like/:id', async (req, res) => {
 				comment: ''
 			},
 			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
-		});
+		})).json();
 
 		res.json(data);
 	} catch (err) {
@@ -122,22 +117,21 @@ app.get('/unlike/:id', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const { data: postData } = await axios({
+		const { data: postData } = await (await fetch({
 			url: `https://www.pixiv.net/ajax/illust/${id}`,
-			method: 'get',
-			headers: { ...authHeaders }
-		});
+			headers: authHeaders
+		})).json();
 
 		const bookmarkId = postData.body.bookmarkData?.id;
 
 		if (!bookmarkId) return res.status(404).json({ error: true, message: 'Bookmark data does not exist.', body: [] });
 
-		const { data: deleteData } = await axios({
+		const { data: deleteData } = await (await fetch({
 			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
 			method: 'post',
 			data: `bookmark_id=${bookmarkId}`,
 			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
-		});
+		})).json();
 
 		res.json(deleteData);
 	} catch (err) {
@@ -182,11 +176,10 @@ app.get('/following/:page', async (req, res) => {
 app.get('/user/:id', async (req, res) => {
 	const { id } = req.params;
 
-	const postIds = await axios({
+	const postIds = await (await fetch({
 		url: `https://www.pixiv.net/ajax/user/${id}/profile/all?lang=en`,
-		method: 'get',
 		headers: authHeaders
-	});
+	})).json();
 
 	const urlMappedIllusts = Object.keys(postIds.data.body.illusts).reverse().slice(0, 100).map(postId => `ids[]=${postId}`);
 	getFromPixiv(
@@ -276,7 +269,7 @@ io.on('connection', socket => {
 
 const start = async () => {
 	try {
-		await axios.get(`http://${devURI}`);
+		await fetch(`http://${devURI}`);
 		console.log('Using dev proxy');
 		app.use(devProxy);
 	} catch (e) {

@@ -1,7 +1,7 @@
 const getPostsWrapper = ({ userId, requestCooldown, privateImages }) => {
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/103.0',
-		Cookie: //`PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
+		Cookie: `PHPSESSID=${userId}_${process.env.PIXIV_TOKEN};`
 	};
 
 	const generateURL = (offset = 0) =>

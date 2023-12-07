@@ -41,8 +41,7 @@ app.get('/imgproxy/:id/', async (req, res) => {
 	const { id, url } = req.params;
 	const date = dateUnderscore.replace(/_/g, '/');
 
-	const { body: stream } = await fetch({
-		url: decodeURIComponent(url) || `https://i.pximg.net/img-master/img/${date}/${id}_p${page || 0}_master1200.jpg`,
+	const { body: stream } = await fetch(decodeURIComponent(url) || `https://i.pximg.net/img-master/img/${date}/${id}_p${page || 0}_master1200.jpg`, {
 		headers: {
 			Referer: 'https://www.pixiv.net'
 		}
@@ -55,8 +54,7 @@ app.get('/imgproxy/:id/', async (req, res) => {
 app.get('/pages/:id', async (req, res) => {
 	const { id } = req.params;
 
-	const pages = await (await fetch({
-		url: `https://www.pixiv.net/ajax/illust/${id}/pages`,
+	const pages = await (await fetch(`https://www.pixiv.net/ajax/illust/${id}/pages`, {
 		headers: authHeaders
 	})).json();
 
@@ -69,8 +67,8 @@ app.get('/pages/:id', async (req, res) => {
 
 const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => {
 	try {
-		const posts = await (await fetch({
-			url: pixivUrl,
+		console.log(pixivUrl);
+		const posts = await (await fetch(pixivUrl, {
 			headers: authHeaders
 		})).json();
 
@@ -86,6 +84,7 @@ const getFromPixiv = async (req, res, pixivUrl, processing = posts => posts) => 
 
 		res.json(formattedPosts);
 	} catch (err) {
+		console.log(err);
 		res.status(500).json(err?.response?.data || err);
 	}
 };
@@ -95,8 +94,7 @@ app.get('/like/:id', async (req, res) => {
 	const { priv, r18 } = req.query;
 
 	try {
-		const { data } = await (await fetch({
-			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/add',
+		const { data } = await (await fetch('https://www.pixiv.net/ajax/illusts/bookmarks/add', {
 			method: 'post',
 			data: {
 				illust_id: id,
@@ -117,8 +115,7 @@ app.get('/unlike/:id', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const { data: postData } = await (await fetch({
-			url: `https://www.pixiv.net/ajax/illust/${id}`,
+		const { data: postData } = await (await fetch(`https://www.pixiv.net/ajax/illust/${id}`, {
 			headers: authHeaders
 		})).json();
 
@@ -126,8 +123,7 @@ app.get('/unlike/:id', async (req, res) => {
 
 		if (!bookmarkId) return res.status(404).json({ error: true, message: 'Bookmark data does not exist.', body: [] });
 
-		const { data: deleteData } = await (await fetch({
-			url: 'https://www.pixiv.net/ajax/illusts/bookmarks/delete',
+		const { data: deleteData } = await (await fetch('https://www.pixiv.net/ajax/illusts/bookmarks/delete', {
 			method: 'post',
 			data: `bookmark_id=${bookmarkId}`,
 			headers: { 'x-csrf-token': process.env.CSRF_TOKEN, ...authHeaders }
@@ -176,8 +172,7 @@ app.get('/following/:page', async (req, res) => {
 app.get('/user/:id', async (req, res) => {
 	const { id } = req.params;
 
-	const postIds = await (await fetch({
-		url: `https://www.pixiv.net/ajax/user/${id}/profile/all?lang=en`,
+	const postIds = await (await fetch(`https://www.pixiv.net/ajax/user/${id}/profile/all?lang=en`, {
 		headers: authHeaders
 	})).json();
 
@@ -269,7 +264,7 @@ io.on('connection', socket => {
 
 const start = async () => {
 	try {
-		await fetch(`http://${devURI}`);
+		await fetch(`${devURI}`);
 		console.log('Using dev proxy');
 		app.use(devProxy);
 	} catch (e) {

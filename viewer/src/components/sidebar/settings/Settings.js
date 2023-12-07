@@ -16,6 +16,14 @@ const Settings = ({ socket }) => {
 	const sortType = useSelector(selectSortType);
 	const sortState = useSelector(selectSortState);
 
+	const sortIdMap = {
+		0: 'Default',
+		1: 'Dec',
+		2: 'Asc',
+		3: 'Random',
+		4: 'ID'
+	};
+
 	const handleSubmitSettings = () => {
 		let newSettings = {};
 
@@ -88,8 +96,7 @@ const Settings = ({ socket }) => {
 			<button onClick={() => {
 				dispatch(nextSortState());
 				dispatch(updateCurrentPosts());
-				/* @TODO make this not reliant on terinaries so i can expand it more */
-			}}>{sortState === 0 ? 'Default' : sortState === 1 ? 'Dec' : sortState === 2 ? 'Asc' : 'Random'}</button>
+			}}>{sortIdMap[sortState]}</button>
 		</div>
 		<br />
 		<button onClick={() => { handleSubmitSettings(); socket.emit('sync'); }}>Sync</button>

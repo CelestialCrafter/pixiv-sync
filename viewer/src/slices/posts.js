@@ -84,6 +84,7 @@ export const updateCurrentPosts = createAsyncThunk('posts/updateCurrentPosts', a
 		if (!bValue) return -1;
 		return aValue > bValue ? 1 : -1;
 	}); else if (state.sort.state === 3) newPosts = shuffle(newPosts);
+	else if (state.sort.state === 4) newPosts.sort((a, b) => a.id - b.id);
 
 	return newPosts;
 });

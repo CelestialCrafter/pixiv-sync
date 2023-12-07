@@ -21,7 +21,7 @@ const Image = ({ i, forceLoad, setLoaded, windowWidth, setPoints, setClicked, se
 	const dispatch = useDispatch();
 
 	const post = posts[i];
-	const postSize = post.sizes ? post.sizes[0] : { width: 1920, height: 1080 };
+	const postSize = post.sizes.length > 0 ? post.sizes[0] : { width: 1920, height: 1080 };
 	const enTagsString = post.tags.map(tag => tags[tag]).filter(t => t).join(', ');
 
 	let rowSize;
